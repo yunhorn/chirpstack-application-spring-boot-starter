@@ -81,6 +81,8 @@ public class BaseServiceLoraWanHttp {
             if (StringUtils.isBlank(token)){
                 Map<String,String> authHeadMap = getAuthHeadMap(domain,currentOperator.getAccount(),currentOperator.getPassword());
                 headerMap.putAll(authHeadMap);
+            }else {
+                headerMap.put("Grpc-Metadata-Authorization",token);
             }
         }
     }
@@ -99,7 +101,7 @@ public class BaseServiceLoraWanHttp {
         CurrentOperator currentOperator = getCurrentOperator(domain);
         String cacheKey = GlobalHelper.getCacheKey(GlobalHelper.CHIRPSTACK_USER_INFO_CACHE
                 ,currentOperator.getCurrentUser(),account);
-        tokenMap.put(cacheKey,token);
+        tokenMap.put(cacheKey,"Bearer "+ token);
         return headerMap;
     }
 
