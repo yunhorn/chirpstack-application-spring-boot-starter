@@ -45,6 +45,10 @@ public class BaseServiceLoraWanHttp {
             account = currentOperator.getAccount();
             password = currentOperator.getPassword();
         }
+        if (domain.endsWith("/")){
+            //若传进来的domain以“/”结尾 则需去掉
+            domain = domain.substring(0,domain.length()-1);
+        }
         checkHeaderMap(domain, account,password, headerMap);
         String result = request(domain, path, headerMap, reqBody, httpMethod);
         if (checkIsAuthenticationFailed(result)){
