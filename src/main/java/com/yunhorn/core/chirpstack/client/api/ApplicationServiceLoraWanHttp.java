@@ -98,8 +98,8 @@ public class ApplicationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
 //            reqMap.put("application",applicationMap);
 //        }
 //        ApplicationServiceLoraWanHttp applicationServiceLoraWanHttp = new ApplicationServiceLoraWanHttp();
-//        ApplicationsPostResp applicationsPostResp = applicationServiceLoraWanHttp.sendHttpsPost("http://47.240.84.71:8080","/api/applications",null,applicationsPostReq,ApplicationsPostResp.class);
-//        ApplicationsPostResp applicationsPostResp = applicationServiceLoraWanHttp.post(applicationsPostReq,"http://47.240.84.71:8080","admin","admin");
+//        ApplicationsPostResp applicationsPostResp = applicationServiceLoraWanHttp.sendHttpsPost("http://localhost:8080","/api/applications",null,applicationsPostReq,ApplicationsPostResp.class);
+//        ApplicationsPostResp applicationsPostResp = applicationServiceLoraWanHttp.post(applicationsPostReq,"http://localhost:8080","admin","admin");
 
 //        System.out.println(applicationsPostResp);
 
@@ -112,14 +112,14 @@ public class ApplicationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
 //        application.setOrganizationID("1");
 //        applicationsPutReq.setApplication(application);
 //        ApplicationServiceLoraWanHttp applicationServiceLoraWanHttp = new ApplicationServiceLoraWanHttp();
-//        applicationServiceLoraWanHttp.put(applicationsPutReq,"http://47.240.84.71:8080",null,null);
+//        applicationServiceLoraWanHttp.put(applicationsPutReq,"http://localhost:8080",null,null);
 
 //        ApplicationServiceLoraWanHttp applicationServiceLoraWanHttp = new ApplicationServiceLoraWanHttp();
-//        applicationServiceLoraWanHttp.get("21","http://47.240.84.71:8080",null,null);
+//        applicationServiceLoraWanHttp.get("21","http://localhost:8080",null,null);
 
         ApplicationsGetReq applicationsGetReq = new ApplicationsGetReq();
         ApplicationServiceLoraWanHttp applicationServiceLoraWanHttp = new ApplicationServiceLoraWanHttp();
-        applicationServiceLoraWanHttp.get(applicationsGetReq,"http://47.240.84.71:8080",null,null);
+        applicationServiceLoraWanHttp.get(applicationsGetReq,"http://localhost:8080",null,null);
     }
 
 
