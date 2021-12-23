@@ -8,16 +8,19 @@
 		<version>2.3.7.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>io.github.yunhorn</groupId>
+	<groupId>com.yunhorn.core</groupId>
 	<artifactId>chirpstack-app-syncer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>chirpstack-app-syncer</name>
+	<name>chirpstack-application-spring-boot-starter</name>
 	<description>Sync your application on two chirpstack-appserver</description>
 	<properties>
 		<java.version>1.8</java.version>
 		<fastjson.version>1.2.76</fastjson.version>
+		<sonar.organization>yunhorn</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 	<dependencies>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
