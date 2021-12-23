@@ -10,14 +10,11 @@ import lombok.Data;
 public class CurrentOperator {
     private String account;
     private String password;
-    private String currentUser;
     public CurrentOperator(){
 
     }
-
-    public CurrentOperator(String account,String password,String currentUser){
+    public CurrentOperator(String account,String password){
         this.account = account;
         this.password = password;
-        this.currentUser = currentUser;
     }
 }

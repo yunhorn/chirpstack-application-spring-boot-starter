@@ -7,6 +7,7 @@ import com.yunhorn.core.chirpstack.util.JSONUtils;
 import com.yunhorn.core.chirpstack.config.UserInfo;
 import com.yunhorn.core.chirpstack.util.RestTemplateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -27,18 +28,27 @@ public class BaseServiceLoraWanHttp {
 
     private Map<String,String> tokenMap = Maps.newHashMap();
 
-    protected <T> T sendHttpsGet(String domain,String path, Map<String,String> headerMap,Map<String, String> params,Class<T> responseType){
-        return request(domain,path,headerMap,params,responseType,HttpMethod.GET);
+    protected <T> T sendHttpsGet(String domain,String path,String account,String password, Map<String,String> headerMap,Map<String, String> params,Class<T> responseType){
+        return request(domain,path,account,password,headerMap,params,responseType,HttpMethod.GET);
     }
 
-    private <T> T request(String domain, String path, Map<String,String> headerMap, Object reqBody,Class<T> responseType,HttpMethod httpMethod){
+    private <T> T request(String domain, String path,String account,String password, Map<String,String> headerMap, Object reqBody,Class<T> responseType,HttpMethod httpMethod){
         if (headerMap==null){
             headerMap = Maps.newHashMap();
         }
-        checkHeaderMap(domain, headerMap);
+        if (StringUtils.isBlank(account) || StringUtils.isBlank(password)){
+            //用户名或者密码为空时 则默认根据domain从配置文件里找到对应的账号密码
+            CurrentOperator currentOperator = getCurrentOperator(domain);
+            if (currentOperator==null){
+                return null;
+            }
+            account = currentOperator.getAccount();
+            password = currentOperator.getPassword();
+        }
+        checkHeaderMap(domain, account,password, headerMap);
         String result = request(domain, path, headerMap, reqBody, httpMethod);
         if (checkIsAuthenticationFailed(result)){
-            result = retryRequest(domain,path,headerMap,reqBody,httpMethod);
+            result = retryRequest(domain,path,account,password,headerMap,reqBody,httpMethod);
         }
         return (T) JSONUtils.jsonToBean(result,responseType);
     }
@@ -61,9 +71,8 @@ public class BaseServiceLoraWanHttp {
         return resultMap!=null && resultMap.containsKey("error") && resultMap.get("error").toString().contains("authentication failed");
     }
 
-    private String retryRequest(String domain, String path, Map<String,String> headerMap, Object reqBody, HttpMethod httpMethod){
-        CurrentOperator currentOperator = getCurrentOperator(domain);
-        Map<String,String> authHeadMap = getAuthHeadMap(domain,currentOperator.getAccount(),currentOperator.getPassword());
+    private String retryRequest(String domain, String path, String account,String password, Map<String,String> headerMap, Object reqBody, HttpMethod httpMethod){
+        Map<String,String> authHeadMap = getAuthHeadMap(domain,account,password);
         if (headerMap==null){
             headerMap = Maps.newHashMap();
         }
@@ -71,36 +80,38 @@ public class BaseServiceLoraWanHttp {
         return request(domain, path, headerMap, reqBody, httpMethod);
     }
 
-    private void checkHeaderMap(String domain,Map<String,String> headerMap){
-//        if (!headerMap.containsKey("Grpc-Metadata-Authorization")){
-//            CurrentOperator currentOperator = getCurrentOperator(domain);
-//            String cacheKey = GlobalHelper.getCacheKey(GlobalHelper.CHIRPSTACK_USER_INFO_CACHE
-//                    ,currentOperator.getCurrentUser(),currentOperator.getAccount());
-//            String token = tokenMap.get(cacheKey);
-//            if (StringUtils.isBlank(token)){
-                Map<String,String> authHeadMap = getAuthHeadMap(domain,"admin","admin");
+    private void checkHeaderMap(String domain,String account,String password,Map<String,String> headerMap){
+        if (!headerMap.containsKey("Grpc-Metadata-Authorization") && StringUtils.isNotBlank(account) && StringUtils.isNotBlank(password)){
+            String cacheKey = GlobalHelper.getCacheKey(GlobalHelper.CHIRPSTACK_USER_INFO_CACHE
+                    ,domain,account);
+            String token = tokenMap.get(cacheKey);
+            if (StringUtils.isBlank(token)){
+                Map<String,String> authHeadMap = getAuthHeadMap(domain,account,password);
                 headerMap.putAll(authHeadMap);
-//            }else {
-//                headerMap.put("Grpc-Metadata-Authorization",token);
-//            }
-//        }
+            }else {
+                headerMap.put("Grpc-Metadata-Authorization",token);
+            }
+        }
     }
 
     private CurrentOperator getCurrentOperator(String domain){
         if (userInfo.getSourceDomain().equals(domain)){
-            return new CurrentOperator(userInfo.getSourceAccount(),userInfo.getSourcePassword(), GlobalHelper.CHIRPSTACK_SOURCE);
-        }else{
-            return new CurrentOperator(userInfo.getTargetAccount(),userInfo.getTargetPassword(),GlobalHelper.CHIRPSTACK_TARGET);
+            return new CurrentOperator(userInfo.getSourceAccount(),userInfo.getSourcePassword());
+        }else if (userInfo.getTargetDomain().equals(domain)){
+            return new CurrentOperator(userInfo.getTargetAccount(),userInfo.getTargetPassword());
         }
+        return null;
     }
 
     protected Map<String,String> getAuthHeadMap(String domain,String account,String password){
+        if (StringUtils.isBlank(account) || StringUtils.isBlank(password)){
+            return Collections.emptyMap();
+        }
         String token = login(domain, account, password);
         Map<String,String> headerMap = Collections.singletonMap("Grpc-Metadata-Authorization","Bearer "+ token);
-//        CurrentOperator currentOperator = getCurrentOperator(domain);
-//        String cacheKey = GlobalHelper.getCacheKey(GlobalHelper.CHIRPSTACK_USER_INFO_CACHE
-//                ,currentOperator.getCurrentUser(),account);
-//        tokenMap.put(cacheKey,"Bearer "+ token);
+        String cacheKey = GlobalHelper.getCacheKey(GlobalHelper.CHIRPSTACK_USER_INFO_CACHE
+                ,domain,account);
+        tokenMap.put(cacheKey,"Bearer "+ token);
         return headerMap;
     }
 
@@ -120,16 +131,16 @@ public class BaseServiceLoraWanHttp {
 //        });
 //    }
 
-    protected <T> T sendHttpsPost(String domain, String path, Map<String,String> headerMap, Object reqBody,Class<T> responseType){
-        return request(domain,path,headerMap,reqBody,responseType,HttpMethod.POST);
+    protected <T> T sendHttpsPost(String domain, String path,String account,String password, Map<String,String> headerMap, Object reqBody,Class<T> responseType){
+        return request(domain,path,account,password,headerMap,reqBody,responseType,HttpMethod.POST);
     }
 
-    protected <T> T sendHttpsPut(String domain, String path, Map<String,String> headerMap, Object reqBody,Class<T> responseType){
-        return request(domain,path,headerMap,reqBody,responseType,HttpMethod.PUT);
+    protected <T> T sendHttpsPut(String domain, String path,String account,String password, Map<String,String> headerMap, Object reqBody,Class<T> responseType){
+        return request(domain,path,account,password,headerMap,reqBody,responseType,HttpMethod.PUT);
     }
 
-    protected <T> T sendHttpsDelete(String domain, String path, Map<String,String> headerMap, Object reqBody,Class<T> responseType){
-        return request(domain,path,headerMap,reqBody,responseType,HttpMethod.DELETE);
+    protected <T> T sendHttpsDelete(String domain, String path,String account,String password, Map<String,String> headerMap, Object reqBody,Class<T> responseType){
+        return request(domain,path,account,password,headerMap,reqBody,responseType,HttpMethod.DELETE);
     }
 
 //    protected <T> T sendHttpsPost(String domain, String path, Map<String,String> headerMap, Map<String, Map> reqMap,Class<T> responseType){

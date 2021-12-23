@@ -40,13 +40,12 @@ public class ApplicationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
                 params.put("search",applicationsGetReq.getSearch());
             }
             if (StringUtils.isBlank(applicationsGetReq.getLimit()) && StringUtils.isBlank(applicationsGetReq.getOffset())){
-                ApplicationsGetResp applicationsGetResp = sendHttpsGet(domain,"/api/applications",null,params,ApplicationsGetResp.class);
+                ApplicationsGetResp applicationsGetResp = sendHttpsGet(domain,"/api/applications",account,password,null,params,ApplicationsGetResp.class);
                 String totalCount = applicationsGetResp.getTotalCount();
                 params.put("limit",totalCount);
             }
         }
-        ApplicationsGetResp applicationsGetResp = sendHttpsGet(domain,"/api/applications",null,params,ApplicationsGetResp.class);
-        return applicationsGetResp;
+        return sendHttpsGet(domain,"/api/applications",account,password,null,params,ApplicationsGetResp.class);
     }
 
     /**
@@ -60,8 +59,7 @@ public class ApplicationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
 //            Map<String, Object> application = JSONUtils.jsonToMap(applicationJson);
 //            reqMap.put("application",application);
 //        }
-        ApplicationsPostResp applicationsPostResp = sendHttpsPost(domain,"/api/applications",null,applicationsPostReq,ApplicationsPostResp.class);
-        return applicationsPostResp;
+        return sendHttpsPost(domain,"/api/applications",account,password,null,applicationsPostReq,ApplicationsPostResp.class);
     }
 
     /**
@@ -71,15 +69,14 @@ public class ApplicationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
         if (applicationsPutReq.getApplication()==null || applicationsPutReq.getApplication().getId()==null){
             return;
         }
-        sendHttpsPut(domain,"/api/applications/"+applicationsPutReq.getApplication().getId(),null,applicationsPutReq,String.class);
+        sendHttpsPut(domain,"/api/applications/"+applicationsPutReq.getApplication().getId(),account,password,null,applicationsPutReq,String.class);
     }
 
     /**
      * GET /api/applications/{id}
      */
     public ApplicationsGetInfoResp get(String id, String domain, String account, String password){
-        ApplicationsGetInfoResp applicationsGetInfoResp = sendHttpsGet(domain,"/api/applications/"+id,null,null,ApplicationsGetInfoResp.class);
-        return applicationsGetInfoResp;
+        return sendHttpsGet(domain,"/api/applications/"+id,account,password,null,null,ApplicationsGetInfoResp.class);
     }
 
     public static void main(String[] args) {
