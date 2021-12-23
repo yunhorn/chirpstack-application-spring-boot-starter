@@ -21,6 +21,8 @@ import java.util.Map;
 @Slf4j
 public class ApplicationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
 
+    private final String API_PATH = "/api/applications";
+
     /**
      * GET /api/applications
      */
@@ -45,7 +47,7 @@ public class ApplicationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
                 params.put("limit",totalCount);
             }
         }
-        return sendHttpsGet(domain,"/api/applications",account,password,null,params,ApplicationsGetResp.class);
+        return sendHttpsGet(domain,API_PATH,account,password,null,params,ApplicationsGetResp.class);
     }
 
     /**
@@ -59,7 +61,7 @@ public class ApplicationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
 //            Map<String, Object> application = JSONUtils.jsonToMap(applicationJson);
 //            reqMap.put("application",application);
 //        }
-        return sendHttpsPost(domain,"/api/applications",account,password,null,applicationsPostReq,ApplicationsPostResp.class);
+        return sendHttpsPost(domain,API_PATH,account,password,null,applicationsPostReq,ApplicationsPostResp.class);
     }
 
     /**
@@ -69,14 +71,14 @@ public class ApplicationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
         if (applicationsPutReq.getApplication()==null || applicationsPutReq.getApplication().getId()==null){
             return;
         }
-        sendHttpsPut(domain,"/api/applications/"+applicationsPutReq.getApplication().getId(),account,password,null,applicationsPutReq,String.class);
+        sendHttpsPut(domain,API_PATH+applicationsPutReq.getApplication().getId(),account,password,null,applicationsPutReq,String.class);
     }
 
     /**
      * GET /api/applications/{id}
      */
     public ApplicationsGetInfoResp get(String id, String domain, String account, String password){
-        return sendHttpsGet(domain,"/api/applications/"+id,account,password,null,null,ApplicationsGetInfoResp.class);
+        return sendHttpsGet(domain,API_PATH+id,account,password,null,null,ApplicationsGetInfoResp.class);
     }
 
     public static void main(String[] args) {
