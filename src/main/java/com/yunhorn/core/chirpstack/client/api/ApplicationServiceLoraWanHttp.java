@@ -71,14 +71,14 @@ public class ApplicationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
         if (applicationsPutReq.getApplication()==null || applicationsPutReq.getApplication().getId()==null){
             return;
         }
-        sendHttpsPut(domain,API_PATH+applicationsPutReq.getApplication().getId(),account,password,null,applicationsPutReq,String.class);
+        sendHttpsPut(domain,API_PATH+"/"+applicationsPutReq.getApplication().getId(),account,password,null,applicationsPutReq,String.class);
     }
 
     /**
      * GET /api/applications/{id}
      */
     public ApplicationsGetInfoResp get(String id, String domain, String account, String password){
-        return sendHttpsGet(domain,API_PATH+id,account,password,null,null,ApplicationsGetInfoResp.class);
+        return sendHttpsGet(domain,API_PATH+"/"+id,account,password,null,null,ApplicationsGetInfoResp.class);
     }
 
     public static void main(String[] args) {

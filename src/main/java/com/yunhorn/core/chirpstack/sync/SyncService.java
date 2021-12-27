@@ -83,13 +83,13 @@ public class SyncService {
                 Application sourceApplication = sourceApplicationInfo.getApplication();
                 Application targetApplicationOriginal = targetApplicationInfo.getApplication();
                 if (!sourceApplication.equals(targetApplicationOriginal)){
-                    Application targetApplication = sourceApplication.copyProperties(targetOrganizationID,targetServiceProfileId);
+                    Application targetApplication = sourceApplication.copyProperties(targetOrganizationID,targetServiceProfileId,true);
                     applicationServiceLoraWanHttp.put(new ApplicationsPutReq(targetApplication),targetDomain,targetAccount,targetPassword);
                     log.info("Update target chirpStack Application|Before update:{}|After update:{}", JSONUtils.beanToJson(targetApplicationOriginal),JSONUtils.beanToJson(targetApplication));
                 }
             }else {
                 ApplicationsPostReq applicationsPostReq = new ApplicationsPostReq();
-                applicationsPostReq.setApplication(sourceApplicationInfo.getApplication().copyProperties(targetOrganizationID,targetServiceProfileId));
+                applicationsPostReq.setApplication(sourceApplicationInfo.getApplication().copyProperties(targetOrganizationID,targetServiceProfileId,false));
                 applicationServiceLoraWanHttp.post(applicationsPostReq,targetDomain,targetAccount,targetPassword);
                 log.info("Insert Application to target chirpStack|{}",JSONUtils.beanToJson(applicationsPostReq.getApplication()));
             }

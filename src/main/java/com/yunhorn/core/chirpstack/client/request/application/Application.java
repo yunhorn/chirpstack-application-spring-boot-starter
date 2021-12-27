@@ -44,14 +44,16 @@ public class Application {
                 || (thisApplication.getOrganizationID()!=null && thatApplication.getOrganizationID()==null)
                 || (thisApplication.getServiceProfileID()!=null && thatApplication.getServiceProfileID()==null);
     }
-    public Application copyProperties(String targetOrganizationID,String targetServiceProfileId){
+    public Application copyProperties(String targetOrganizationID,String targetServiceProfileId,boolean withId){
         Application targetApplication = new Application();
         try {
             BeanUtils.copyProperties(targetApplication,this);
         } catch (IllegalAccessException | InvocationTargetException e) {
             log.error("When add new Application ,copyProperties sourceApplication to targetApplication error",e);
         }
-        targetApplication.setId(null);
+        if (!withId){
+            targetApplication.setId(null);
+        }
         targetApplication.setOrganizationID(targetOrganizationID);
         targetApplication.setServiceProfileID(targetServiceProfileId);
         return targetApplication;
