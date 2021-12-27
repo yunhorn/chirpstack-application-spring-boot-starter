@@ -28,4 +28,10 @@ public class ApplicationsGetReq {
     private String offset;
     private String organizationID;
     private String search;
+    public ApplicationsGetReq(){
+
+    }
+    public ApplicationsGetReq(String organizationID){
+        this.organizationID = organizationID;
+    }
 }

@@ -1,45 +1,49 @@
-//package io.github.yunhorn.chirpstackappsyncer.client.api;
-//
-//import com.google.common.collect.Maps;
-//import com.smartoilets.api.service.lorawan.request.serviceprofile.ServiceProfile;
-//import com.smartoilets.api.service.lorawan.request.serviceprofile.ServiceProfileGetReq;
-//import com.smartoilets.api.service.lorawan.request.serviceprofile.ServiceProfilePostReq;
-//import com.smartoilets.api.service.lorawan.response.serviceprofile.ServiceProfileGetInfoResp;
-//import com.smartoilets.api.service.lorawan.response.serviceprofile.ServiceProfileGetResp;
-//import com.smartoilets.api.service.lorawan.response.serviceprofile.ServiceProfilePostResp;
-//import com.smartoilets.common.util.JSONUtils;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.Map;
-//
-///**
-// * @author ljm
-// * @date 2021/2/25 14:55
-// */
-//@Service
-//@Slf4j
-//public class ServiceProfileServiceLoraWanHttp extends BaseServiceLoraWanHttp {
-//
-////    GET /api/service-profiles
-//    public ServiceProfileGetResp get(ServiceProfileGetReq serviceProfileGetReq,String domain, String account, String password){
-//        Map<String, String> params = Maps.newHashMap();
-//        if (serviceProfileGetReq!=null){
-//            String serviceProfileGetReqJson = JSONUtils.beanToJson(serviceProfileGetReq);
-//            params = JSONUtils.jsonToStrMap(serviceProfileGetReqJson);
-//        }
-//        Map<String, String> headerMap = getAuthHeadMap(domain,account,password,false);
-//        String resp = sendHttpsGet(domain,"/api/service-profiles",headerMap,params);
-//        ServiceProfileGetResp serviceProfileGetResp = new ServiceProfileGetResp();
-//        try {
-//            serviceProfileGetResp = (ServiceProfileGetResp) JSONUtils.jsonToBean(resp,ServiceProfileGetResp.class);
-//        }catch (Exception e){
-//            log.error("jsonToBean ServiceProfileGetResp error",e);
-//        }
-//        return serviceProfileGetResp;
-//    }
-//
-////    POST /api/service-profiles
+package com.yunhorn.core.chirpstack.client.api;
+
+import com.google.common.collect.Maps;
+import com.yunhorn.core.chirpstack.client.request.serviceprofile.ServiceProfileGetReq;
+import com.yunhorn.core.chirpstack.client.response.serviceprofile.ServiceProfileGetResp;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+
+/**
+ * @author ljm
+ * @date 2021/2/25 14:55
+ */
+@Service
+@Slf4j
+public class ServiceProfileServiceLoraWanHttp extends BaseServiceLoraWanHttp {
+
+    private final String API_PATH = "/api/service-profiles";
+
+    /**
+     * GET /api/service-profiles
+     */
+    public ServiceProfileGetResp get(ServiceProfileGetReq serviceProfileGetReq, String domain, String account, String password){
+        Map<String, String> params = Maps.newHashMap();
+        if (serviceProfileGetReq!=null){
+            if (StringUtils.isNotBlank(serviceProfileGetReq.getLimit())){
+                params.put("limit",serviceProfileGetReq.getLimit());
+            }
+            if (StringUtils.isNotBlank(serviceProfileGetReq.getOffset())){
+                params.put("offset",serviceProfileGetReq.getOffset());
+            }
+            if (StringUtils.isNotBlank(serviceProfileGetReq.getOrganizationID())){
+                params.put("organizationID",serviceProfileGetReq.getOrganizationID());
+            }
+            if (StringUtils.isBlank(serviceProfileGetReq.getLimit()) && StringUtils.isBlank(serviceProfileGetReq.getOffset())){
+                ServiceProfileGetResp serviceProfileGetResp = sendHttpsGet(domain,API_PATH,account,password,null,params,ServiceProfileGetResp.class);
+                String totalCount = serviceProfileGetResp.getTotalCount();
+                params.put("limit",totalCount);
+            }
+        }
+        return sendHttpsGet(domain,API_PATH,account,password,null,params,ServiceProfileGetResp.class);
+    }
+
+//    POST /api/service-profiles
 //    public ServiceProfilePostResp post(String domain, String account, String password, ServiceProfilePostReq serviceProfilePostReq){
 //        ServiceProfilePostResp serviceProfilePostResp = new ServiceProfilePostResp();
 //        Map<String,Map> reqMap = Maps.newHashMap();
@@ -80,4 +84,4 @@
 //        }
 //        return serviceProfileGetInfoResp;
 //    }
-//}
+}

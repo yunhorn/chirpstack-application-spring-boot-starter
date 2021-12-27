@@ -1,43 +1,49 @@
-//package io.github.yunhorn.chirpstackappsyncer.client.api;
-//
-//import com.google.common.collect.Maps;
-//import com.smartoilets.api.service.lorawan.request.organization.Organization;
-//import com.smartoilets.api.service.lorawan.request.organization.OrganizationGetReq;
-//import com.smartoilets.api.service.lorawan.request.organization.OrganizationPostReq;
-//import com.smartoilets.api.service.lorawan.response.organization.OrganizationGetResp;
-//import com.smartoilets.api.service.lorawan.response.organization.OrganizationPostResp;
-//import com.smartoilets.common.util.JSONUtils;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.Map;
-//
-///**
-// * @author ljm
-// * @date 2021/2/25 14:29
-// */
-//@Service
-//@Slf4j
-//public class OrganizationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
-////    GET /api/organizations
-//    public OrganizationGetResp get(OrganizationGetReq organizationGetReq,String domain, String account, String password){
-//        Map<String, String> params = Maps.newHashMap();
-//        if (organizationGetReq!=null){
-//            String organizationGetReqJson = JSONUtils.beanToJson(organizationGetReq);
-//            params = JSONUtils.jsonToStrMap(organizationGetReqJson);
-//        }
-//        Map<String, String> headerMap = getAuthHeadMap(domain,account,password,false);
-//        String resp = sendHttpsGet(domain,"/api/organizations",headerMap,params);
-//        OrganizationGetResp organizationGetResp = new OrganizationGetResp();
-//        try {
-//            organizationGetResp = (OrganizationGetResp) JSONUtils.jsonToBean(resp,OrganizationGetResp.class);
-//        }catch (Exception e){
-//            log.error("jsonToBean OrganizationGetResp error",e);
-//        }
-//        return organizationGetResp;
-//    }
-//
-////    POST /api/organizations
+package com.yunhorn.core.chirpstack.client.api;
+
+import com.google.common.collect.Maps;
+import com.yunhorn.core.chirpstack.client.request.organization.OrganizationGetReq;
+import com.yunhorn.core.chirpstack.client.response.organization.OrganizationGetResp;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+
+/**
+ * @author ljm
+ * @date 2021/2/25 14:29
+ */
+@Service
+@Slf4j
+public class OrganizationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
+    private final String API_PATH = "/api/organizations";
+
+    /**
+     * GET /api/organizations
+     */
+    public OrganizationGetResp get(OrganizationGetReq organizationGetReq, String domain, String account, String password) {
+        Map<String, String> params = Maps.newHashMap();
+        if (organizationGetReq != null) {
+            if (StringUtils.isNotBlank(organizationGetReq.getLimit())) {
+                params.put("limit", organizationGetReq.getLimit());
+            }
+            if (StringUtils.isNotBlank(organizationGetReq.getOffset())) {
+                params.put("offset", organizationGetReq.getOffset());
+            }
+            if (StringUtils.isNotBlank(organizationGetReq.getSearch())) {
+                params.put("search", organizationGetReq.getSearch());
+            }
+            if (StringUtils.isBlank(organizationGetReq.getLimit()) && StringUtils.isBlank(organizationGetReq.getOffset())) {
+                OrganizationGetResp organizationGetResp = sendHttpsGet(domain, API_PATH, account, password, null, params, OrganizationGetResp.class);
+                String totalCount = organizationGetResp.getTotalCount();
+                params.put("limit", totalCount);
+            }
+
+        }
+        return sendHttpsGet(domain, API_PATH, account, password, null, params, OrganizationGetResp.class);
+    }
+
+//    POST /api/organizations
 //    public OrganizationPostResp post(String domain, String account, String password, OrganizationPostReq organizationPostReq){
 //        OrganizationPostResp organizationPostResp = new OrganizationPostResp();
 //        Map<String,Map> reqMap = Maps.newHashMap();
@@ -64,5 +70,5 @@
 //        }
 //        return organizationPostResp;
 //    }
-//
-//}
+
+}

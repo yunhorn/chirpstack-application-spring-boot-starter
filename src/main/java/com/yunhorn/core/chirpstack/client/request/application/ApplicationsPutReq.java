@@ -21,4 +21,10 @@ public class ApplicationsPutReq {
 //    }
 //    }
     private Application application;
+    public ApplicationsPutReq(){
+
+    }
+    public ApplicationsPutReq(Application application){
+        this.application = application;
+    }
 }

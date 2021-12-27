@@ -17,10 +17,16 @@ public class UserInfo {
     private String sourcePassword;
     @Value("${chirpStack.source.domain:}")
     private String sourceDomain;
+    @Value("${chirpStack.source.organizationName:}")
+    private String sourceOrganizationName;
     @Value("${chirpStack.target.account:}")
     private String targetAccount;
     @Value("${chirpStack.target.password:}")
     private String targetPassword;
     @Value("${chirpStack.target.domain:}")
     private String targetDomain;
+    @Value("${chirpStack.target.organizationName:}")
+    private String targetOrganizationName;
+    @Value("${chirpStack.target.serviceProfile:}")
+    private String targetServiceProfile;
 }

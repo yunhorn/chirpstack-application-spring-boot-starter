@@ -23,4 +23,10 @@ public class ServiceProfileGetReq {
     private String limit;
     private String offset;
     private String organizationID;
+    public ServiceProfileGetReq(){
+
+    }
+    public ServiceProfileGetReq(String organizationID){
+        this.organizationID = organizationID;
+    }
 }

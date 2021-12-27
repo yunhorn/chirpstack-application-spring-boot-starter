@@ -42,7 +42,7 @@ public class ApplicationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
                 params.put("search",applicationsGetReq.getSearch());
             }
             if (StringUtils.isBlank(applicationsGetReq.getLimit()) && StringUtils.isBlank(applicationsGetReq.getOffset())){
-                ApplicationsGetResp applicationsGetResp = sendHttpsGet(domain,"/api/applications",account,password,null,params,ApplicationsGetResp.class);
+                ApplicationsGetResp applicationsGetResp = sendHttpsGet(domain,API_PATH,account,password,null,params,ApplicationsGetResp.class);
                 String totalCount = applicationsGetResp.getTotalCount();
                 params.put("limit",totalCount);
             }
