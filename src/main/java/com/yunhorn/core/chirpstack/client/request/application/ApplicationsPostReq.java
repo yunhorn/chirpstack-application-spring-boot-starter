@@ -21,4 +21,10 @@ public class ApplicationsPostReq {
 //    }
 //    }
     private Application application;
+    public ApplicationsPostReq(){
+
+    }
+    public ApplicationsPostReq(Application application){
+        this.application = application;
+    }
 }

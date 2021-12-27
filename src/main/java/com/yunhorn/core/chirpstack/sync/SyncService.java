@@ -88,10 +88,9 @@ public class SyncService {
                     log.info("Update target chirpStack Application|Before update:{}|After update:{}", JSONUtils.beanToJson(targetApplicationOriginal),JSONUtils.beanToJson(targetApplication));
                 }
             }else {
-                ApplicationsPostReq applicationsPostReq = new ApplicationsPostReq();
-                applicationsPostReq.setApplication(sourceApplicationInfo.getApplication().copyProperties(targetOrganizationID,targetServiceProfileId,false));
-                applicationServiceLoraWanHttp.post(applicationsPostReq,targetDomain,targetAccount,targetPassword);
-                log.info("Insert Application to target chirpStack|{}",JSONUtils.beanToJson(applicationsPostReq.getApplication()));
+                Application targetApplication = sourceApplicationInfo.getApplication().copyProperties(targetOrganizationID,targetServiceProfileId,false);
+                applicationServiceLoraWanHttp.post(new ApplicationsPostReq(targetApplication),targetDomain,targetAccount,targetPassword);
+                log.info("Insert Application to target chirpStack|{}",JSONUtils.beanToJson(targetApplication));
             }
         }
 
