@@ -1,94 +1,108 @@
-//package io.github.yunhorn.chirpstackappsyncer.client.api;
-//
-//import com.google.common.collect.Maps;
-//import com.smartoilets.api.service.lorawan.request.device.Device;
-//import com.smartoilets.api.service.lorawan.request.device.DeviceGetReq;
-//import com.smartoilets.api.service.lorawan.request.device.DeviceKeysPostReq;
-//import com.smartoilets.api.service.lorawan.request.device.DevicePostReq;
-//import com.smartoilets.api.service.lorawan.response.device.DeviceGetInfoResp;
-//import com.smartoilets.api.service.lorawan.response.device.DeviceGetResp;
-//import com.smartoilets.api.service.lorawan.response.device.DeviceKeys;
-//import com.smartoilets.api.service.lorawan.response.device.DeviceKeysGetResp;
-//import com.smartoilets.common.util.HttpClientUtil;
-//import com.smartoilets.common.util.JSONUtils;
-//import lombok.extern.slf4j.Slf4j;
-//import org.apache.commons.lang.StringUtils;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.Map;
-//
-///**
-// * @author ljm
-// * @date 2021/2/24 17:23
-// */
-//@Service
-//@Slf4j
-//public class DeviceServiceLoraWanHttp extends BaseServiceLoraWanHttp {
-//
-//    /**
-//     * GET /api/devices
-//     */
-//    public DeviceGetResp get(DeviceGetReq deviceGetReq,String domain,String account,String password){
-//        Map<String, String> params = Maps.newHashMap();
-//        if (deviceGetReq!=null){
-//            String deviceGetReqJson = JSONUtils.beanToJson(deviceGetReq);
-//            params = JSONUtils.jsonToStrMap(deviceGetReqJson);
-//        }
-//        Map<String, String> headerMap = getAuthHeadMap(domain,account,password,false);
-//        String resp = sendHttpsGet(domain,"/api/devices",headerMap,params);
-//        DeviceGetResp deviceGetResp = new DeviceGetResp();
-//        try {
-//            deviceGetResp = (DeviceGetResp) JSONUtils.jsonToBean(resp,DeviceGetResp.class);
-//        }catch (Exception e){
-//            log.error("jsonToBean DeviceGetResp error",e);
-//        }
-//
-////        getToken
-////        get1
-////        get2
-//
-//        return deviceGetResp;
-//    }
-//
-//    /**
-//     * POST /api/devices
-//     */
-//    public boolean post(DevicePostReq devicePostReq,String domain,String account,String password,boolean deleteWhenExist){
-//        Map<String,Map> reqMap = Maps.newHashMap();
-//        if (devicePostReq!=null && devicePostReq.getDevice()!=null && StringUtils.isNotBlank(devicePostReq.getDevice().getDevEUI()) ){
-//            Device deviceReq = devicePostReq.getDevice();
-//            String deviceJson = JSONUtils.beanToJson(deviceReq);
-//            Map<String, Object> device = JSONUtils.jsonToMap(deviceJson);
-//            reqMap.put("device",device);
-//        }else {
-//            return false;
-//        }
-//        Map<String,String> headerMap = getAuthHeadMap(domain,account,password,false);
-//        String resp = sendHttpsPost(domain,"/api/devices",headerMap,reqMap);
-//        Map<String,Object> respMap = JSONUtils.jsonToMap(resp);
-//        if (respMap!=null && respMap.containsKey("error")){
-//            String errorMsg = (String) respMap.get("error");
-//            if (deleteWhenExist && "object already exists".equalsIgnoreCase(errorMsg)){
-//                String delResp = HttpClientUtil.getInstance().sendHttpDelete(domain+"/api/devices/"+devicePostReq.getDevice().getDevEUI(), headerMap);
-//                String reInsertResp = sendHttpsPost(domain,"/api/devices",headerMap,reqMap);
-//                Map<String,Object> reInsertMap = JSONUtils.jsonToMap(reInsertResp);
-//                if (reInsertMap!=null && reInsertMap.containsKey("error")) {
-//                    //重新添加设备还是出错
-//                    log.error("LoraWanHttpDeviceService reAdd device({}) error,respMap:{}", devicePostReq.getDevice(), reInsertMap);
-//                    return false;
-//                }else {
-//                    log.info("reInsert device Success,device:{}",devicePostReq.getDevice());
-//                    return true;
-//                }
-//            }else {
-//                log.info("deleteWhenExist is false,no reInsert device:{}",devicePostReq.getDevice());
-//                return true;
-//            }
-//        }else {
-//            log.info("insert device Success,device:{}",devicePostReq.getDevice());
-//            return true;
-//        }
-//    }
+package com.yunhorn.core.chirpstack.client.api;
+
+import com.google.common.collect.Maps;
+import com.yunhorn.core.chirpstack.client.request.device.Device;
+import com.yunhorn.core.chirpstack.client.request.device.DeviceGetReq;
+import com.yunhorn.core.chirpstack.client.request.device.DevicePostReq;
+import com.yunhorn.core.chirpstack.client.response.device.DeviceGetResp;
+import com.yunhorn.core.chirpstack.util.JSONUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+
+/**
+ * @author ljm
+ * @date 2021/2/24 17:23
+ */
+@Service
+@Slf4j
+public class DeviceServiceLoraWanHttp extends BaseServiceLoraWanHttp {
+
+    private final String API_PATH = "/api/devices";
+
+    /**
+     * GET /api/devices
+     */
+    public DeviceGetResp get(DeviceGetReq deviceGetReq, String domain, String account, String password){
+        Map<String, String> params = Maps.newHashMap();
+        if (deviceGetReq!=null){
+            String deviceGetReqJson = JSONUtils.beanToJson(deviceGetReq);
+            params = JSONUtils.jsonToStrMap(deviceGetReqJson);
+            if (params==null){
+                return null;
+            }
+            if (StringUtils.isBlank(deviceGetReq.getLimit()) && StringUtils.isBlank(deviceGetReq.getOffset())){
+                DeviceGetResp deviceGetResp = sendHttpsGet(domain,API_PATH,account,password,null,params,DeviceGetResp.class);
+                String totalCount = deviceGetResp.getTotalCount();
+                params.put("limit",totalCount);
+            }
+        }
+        return sendHttpsGet(domain,API_PATH,account,password,null,params,DeviceGetResp.class);
+    }
+
+    public static void main(String[] args) {
+        String domain = "";
+        String account = "admin";
+        String password = "admin";
+        DeviceServiceLoraWanHttp deviceServiceLoraWanHttp = new DeviceServiceLoraWanHttp();
+        DevicePostReq devicePostReq = new DevicePostReq();
+        Device device = new Device();
+        device.setApplicationID("21");
+        device.setDescription("test Device");
+        device.setDevEUI("ffffff100000c444");
+        device.setDeviceProfileID("");
+        device.setName("test Device");
+        devicePostReq.setDevice(device);
+        boolean b = deviceServiceLoraWanHttp.post(devicePostReq,domain,account,password,true);
+        System.out.println(b);
+    }
+
+    /**
+     * POST /api/devices
+     */
+    public boolean post(DevicePostReq devicePostReq, String domain, String account, String password, boolean deleteWhenExist){
+        try {
+            String resp = sendHttpsPost(domain,API_PATH,account,password,null,devicePostReq,String.class);
+            log.info("Insert device Success,devEui:{}|respMsg:{}",devicePostReq.getDevice(),resp);
+        }catch (Exception e){
+            String errorMsg = e.getMessage();
+            if (errorMsg.contains("object already exists")){
+                if (deleteWhenExist){
+                    try {
+                        String delResp = delete(devicePostReq.getDevice().getDevEUI(), domain, account, password);
+                        log.info("Delete device when exist|devEui:{}|respMsg:{}",devicePostReq.getDevice().getDevEUI(),delResp);
+                    }catch (Exception deleteE) {
+                        String deleteErrorMsg = deleteE.getMessage();
+                        log.error("Delete device error when post exist|{}|{}", devicePostReq.getDevice().getDevEUI(), deleteErrorMsg);
+                        return false;
+                    }
+                    try {
+                        String reAddResp = sendHttpsPost(domain, API_PATH, account, password, null, devicePostReq, String.class);
+                        log.info("ReAdd device|devEui:{}|respMsg:{}",devicePostReq.getDevice().getDevEUI(),reAddResp);
+                        return true;
+                    }catch (Exception reAddE){
+                        String reAddErrorMsg = reAddE.getMessage();
+                        log.error("ReAdd device({}) error|{}", devicePostReq.getDevice().getDevEUI(), reAddErrorMsg);
+                        return false;
+                    }
+                }else {
+                    log.info("Device already exists but not delete when exist|{}",devicePostReq.getDevice().getDevEUI());
+                    return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * DELETE /api/devices/{dev_eui}
+     */
+    public String delete(String dev_eui,String domain, String account, String password){
+        return sendHttpsDelete(domain,API_PATH+"/"+dev_eui,account,password,null,null,String.class);
+    }
+
 //
 //    public DeviceGetInfoResp get(String dev_eui,String domain,String account,String password){
 //        Map<String, String> params = Maps.newHashMap();
@@ -157,4 +171,4 @@
 //        }
 //        return true;
 //    }
-//}
+}
