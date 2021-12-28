@@ -2,6 +2,8 @@ package com.yunhorn.core.chirpstack.client.request.device;
 
 import lombok.Data;
 
+import java.util.Map;
+
 /**
  * @author ljm
  * @date 2021/2/24 17:48
@@ -27,5 +29,7 @@ public class Device {
     private String name;
     private int referenceAltitude = 0;
     private boolean skipFCntCheck = true;
+    private Map<String,String> tags;//name
+    private Map<String,String> variables;//value
 
 }

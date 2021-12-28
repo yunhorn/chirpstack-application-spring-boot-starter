@@ -4,6 +4,8 @@ import com.google.common.collect.Maps;
 import com.yunhorn.core.chirpstack.client.request.device.Device;
 import com.yunhorn.core.chirpstack.client.request.device.DeviceGetReq;
 import com.yunhorn.core.chirpstack.client.request.device.DevicePostReq;
+import com.yunhorn.core.chirpstack.client.request.device.DevicePutReq;
+import com.yunhorn.core.chirpstack.client.response.device.DeviceGetInfoResp;
 import com.yunhorn.core.chirpstack.client.response.device.DeviceGetResp;
 import com.yunhorn.core.chirpstack.util.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -52,11 +54,20 @@ public class DeviceServiceLoraWanHttp extends BaseServiceLoraWanHttp {
         device.setApplicationID("21");
         device.setDescription("test Device");
         device.setDevEUI("ffffff100000c444");
-        device.setDeviceProfileID("");
+        device.setDeviceProfileID("b35de8ce-9dcb-4ca9-b534-98c26e1a7c47");
         device.setName("test Device");
+        Map<String,String> tags = Maps.newHashMap();
+        tags.put("aaa","aaa");
+        device.setTags(tags);
+        Map<String,String> variables = Maps.newHashMap();
+        variables.put("bb","bb");
+        device.setVariables(variables);
         devicePostReq.setDevice(device);
         boolean b = deviceServiceLoraWanHttp.post(devicePostReq,domain,account,password,true);
         System.out.println(b);
+
+        DeviceGetInfoResp deviceGetInfoResp = deviceServiceLoraWanHttp.get("ffffff100000c444",domain,account,password);
+        System.out.println(deviceGetInfoResp);
     }
 
     /**
@@ -103,20 +114,18 @@ public class DeviceServiceLoraWanHttp extends BaseServiceLoraWanHttp {
         return sendHttpsDelete(domain,API_PATH+"/"+dev_eui,account,password,null,null,String.class);
     }
 
-//
-//    public DeviceGetInfoResp get(String dev_eui,String domain,String account,String password){
-//        Map<String, String> params = Maps.newHashMap();
-//        params.put("dev_eui",dev_eui);
-//        Map<String, String> headerMap = getAuthHeadMap(domain,account,password,false);
-//        String resp = sendHttpsGet(domain,"/api/devices/"+dev_eui,headerMap,params);
-//        DeviceGetInfoResp deviceGetInfoResp = new DeviceGetInfoResp();
-//        try {
-//            deviceGetInfoResp = (DeviceGetInfoResp) JSONUtils.jsonToBean(resp,DeviceGetInfoResp.class);
-//        }catch (Exception e){
-//            log.error("jsonToBean DeviceGetInfoResp error",e);
-//        }
-//        return deviceGetInfoResp;
-//    }
+    public String put(DevicePutReq devicePutReq,String domain, String account, String password){
+        if (StringUtils.isBlank(devicePutReq.getDevice().getDevEUI())){
+            log.error("Put device lack of dev_eui|{}|{}|{}|{}",JSONUtils.beanToJson(devicePutReq),domain,account,password);
+            return null;
+        }
+        return sendHttpsPut(domain,API_PATH+"/"+devicePutReq.getDevice().getDevEUI(),account,password,null,devicePutReq,String.class);
+    }
+
+
+    public DeviceGetInfoResp get(String dev_eui, String domain, String account, String password){
+        return sendHttpsGet(domain,API_PATH+"/"+dev_eui,account,password,null,null,DeviceGetInfoResp.class);
+    }
 //
 //    /**
 //     * GET /api/devices/{dev_eui}/keys
