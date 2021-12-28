@@ -1,14 +1,13 @@
 package com.yunhorn.core.chirpstack.client.api;
 
 import com.google.common.collect.Maps;
-import com.yunhorn.core.chirpstack.client.request.device.Device;
-import com.yunhorn.core.chirpstack.client.request.device.DeviceGetReq;
-import com.yunhorn.core.chirpstack.client.request.device.DevicePostReq;
-import com.yunhorn.core.chirpstack.client.request.device.DevicePutReq;
+import com.yunhorn.core.chirpstack.client.request.device.*;
 import com.yunhorn.core.chirpstack.client.response.device.DeviceGetInfoResp;
 import com.yunhorn.core.chirpstack.client.response.device.DeviceGetResp;
+import com.yunhorn.core.chirpstack.client.response.device.DeviceKeysGetResp;
 import com.yunhorn.core.chirpstack.util.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -49,25 +48,48 @@ public class DeviceServiceLoraWanHttp extends BaseServiceLoraWanHttp {
         String account = "admin";
         String password = "admin";
         DeviceServiceLoraWanHttp deviceServiceLoraWanHttp = new DeviceServiceLoraWanHttp();
-        DevicePostReq devicePostReq = new DevicePostReq();
-        Device device = new Device();
-        device.setApplicationID("21");
-        device.setDescription("test Device");
-        device.setDevEUI("ffffff100000c444");
-        device.setDeviceProfileID("b35de8ce-9dcb-4ca9-b534-98c26e1a7c47");
-        device.setName("test Device");
-        Map<String,String> tags = Maps.newHashMap();
-        tags.put("aaa","aaa");
-        device.setTags(tags);
-        Map<String,String> variables = Maps.newHashMap();
-        variables.put("bb","bb");
-        device.setVariables(variables);
-        devicePostReq.setDevice(device);
-        boolean b = deviceServiceLoraWanHttp.post(devicePostReq,domain,account,password,true);
-        System.out.println(b);
+//        DevicePostReq devicePostReq = new DevicePostReq();
+//        Device device = new Device();
+//        device.setApplicationID("21");
+//        device.setDescription("test Device");
+//        device.setDevEUI("ffffff100000c444");
+//        device.setDeviceProfileID("b35de8ce-9dcb-4ca9-b534-98c26e1a7c47");
+//        device.setName("test Device");
+//        Map<String,String> tags = Maps.newHashMap();
+//        tags.put("aaa","aaa");
+//        device.setTags(tags);
+//        Map<String,String> variables = Maps.newHashMap();
+//        variables.put("bb","bb");
+//        device.setVariables(variables);
+//        devicePostReq.setDevice(device);
+//        boolean b = deviceServiceLoraWanHttp.post(devicePostReq,domain,account,password,true);
+//        System.out.println(b);
+//
+//        DeviceGetInfoResp deviceGetInfoResp = deviceServiceLoraWanHttp.get("ffffff100000c444",domain,account,password);
+//        System.out.println(deviceGetInfoResp);
 
-        DeviceGetInfoResp deviceGetInfoResp = deviceServiceLoraWanHttp.get("ffffff100000c444",domain,account,password);
-        System.out.println(deviceGetInfoResp);
+        DeviceKeysGetResp deviceKeysGetResp = deviceServiceLoraWanHttp.getDeviceKey("ffffff100001ef8b",domain,account,password);
+        System.out.println(deviceKeysGetResp);
+        DeviceKeysPostReq deviceKeysPostReq = new DeviceKeysPostReq();
+        try {
+            BeanUtils.copyProperties(deviceKeysPostReq,deviceKeysGetResp);
+        }catch (Exception e){
+            return;
+        }
+        deviceKeysPostReq.getDeviceKeys().setDevEUI("ffffff100000c444");
+        deviceServiceLoraWanHttp.postDeviceKey(deviceKeysPostReq,domain,account,password,true);
+        deviceKeysGetResp = deviceServiceLoraWanHttp.getDeviceKey("ffffff100001eed3",domain,account,password);
+        DeviceKeysPutReq deviceKeysPutReq = new DeviceKeysPutReq();
+        try {
+            BeanUtils.copyProperties(deviceKeysPutReq,deviceKeysGetResp);
+        }catch (Exception e){
+            return;
+        }
+        deviceKeysPutReq.getDeviceKeys().setDevEUI("ffffff100000c444");
+        String resp = deviceServiceLoraWanHttp.putDeviceKey(deviceKeysPutReq,domain,account,password);
+        System.out.println(resp);
+        String respDel = deviceServiceLoraWanHttp.deleteDeviceKey("ffffff100000c444",domain,account,password);
+        System.out.println(respDel);
     }
 
     /**
@@ -126,58 +148,66 @@ public class DeviceServiceLoraWanHttp extends BaseServiceLoraWanHttp {
     public DeviceGetInfoResp get(String dev_eui, String domain, String account, String password){
         return sendHttpsGet(domain,API_PATH+"/"+dev_eui,account,password,null,null,DeviceGetInfoResp.class);
     }
-//
-//    /**
-//     * GET /api/devices/{dev_eui}/keys
-//     */
-//    public DeviceKeysGetResp getDeviceKey(String dev_eui,String domain,String account,String password){
-//        if (StringUtils.isBlank(dev_eui)){
-//            return new DeviceKeysGetResp();
-//        }
-//        Map<String, String> params = Maps.newHashMap();
-//        params.put("dev_eui",dev_eui);
-//        Map<String, String> headerMap = getAuthHeadMap(domain,account,password,false);
-//        String resp = sendHttpsGet(domain,"/api/devices/"+dev_eui+"/keys",headerMap,params);
-//        DeviceKeysGetResp deviceKeysGetResp = new DeviceKeysGetResp();
-//        try {
-//            deviceKeysGetResp = (DeviceKeysGetResp) JSONUtils.jsonToBean(resp,DeviceKeysGetResp.class);
-//        }catch (Exception e){
-//            log.error("jsonToBean DeviceKeysGetResp error",e);
-//        }
-//        return deviceKeysGetResp;
-//    }
-//
-////    POST /api/devices/{device_keys.dev_eui}/keys
-//    public boolean postDeviceKey(String domain,String account,String password,String dev_eui, DeviceKeysPostReq deviceKeysPostReq,boolean deleteWhenExist){
-//        if (deviceKeysPostReq==null || deviceKeysPostReq.getDeviceKeys()==null){
-//            return false;
-//        }
-//        Map<String,Map> reqMap = Maps.newHashMap();
-//        DeviceKeys deviceKeysReq = deviceKeysPostReq.getDeviceKeys();
-//        String deviceKeysJson = JSONUtils.beanToJson(deviceKeysReq);
-//        Map<String, Object> deviceKeys = JSONUtils.jsonToMap(deviceKeysJson);
-//        reqMap.put("deviceKeys",deviceKeys);
-//        Map<String,String> headerMap = getAuthHeadMap(domain,account,password,false);
-//        String resp = sendHttpsPost(domain,"/api/devices/"+dev_eui+"/keys",headerMap,reqMap);
-//        Map<String,Object> respMap = JSONUtils.jsonToMap(resp);
-//        if (respMap!=null && respMap.containsKey("error")){
-//            String errorMsg = (String) respMap.get("error");
-//            log.error("postDeviceKey error|dev_eui:{}|message:{}",dev_eui,errorMsg);
-//            if (deleteWhenExist && "object already exists".equalsIgnoreCase(errorMsg)){
-//                String delResp = HttpClientUtil.getInstance().sendHttpDelete(domain+"/api/devices/"+dev_eui+"/keys", headerMap);
-//                String reInsertResp = sendHttpsPost(domain,"/api/devices",headerMap,reqMap);
-//                Map<String,Object> reInsertMap = JSONUtils.jsonToMap(reInsertResp);
-//                if (reInsertMap!=null && reInsertMap.containsKey("error")) {
-//                    //重新添加设备还是出错
-//                    log.error("LoraWanHttpDeviceService reAdd device({}) error,respMap:{}", dev_eui, reInsertMap);
-//                    return false;
-//                }else {
-//                    log.info("reInsert device Success,device:{}",dev_eui);
-//                    return true;
-//                }
-//            }
-//            return false;
-//        }
-//        return true;
-//    }
+
+    /**
+     * GET /api/devices/{dev_eui}/keys
+     */
+    public DeviceKeysGetResp getDeviceKey(String dev_eui, String domain, String account, String password){
+        return sendHttpsGet(domain,API_PATH+"/"+dev_eui+"/"+"keys",account,password,null,null,DeviceKeysGetResp.class);
+    }
+
+    /**
+     * POST /api/devices/{device_keys.dev_eui}/keys
+     */
+    public boolean postDeviceKey(DeviceKeysPostReq deviceKeysPostReq, String domain, String account, String password, boolean deleteWhenExist){
+        String dev_eui = deviceKeysPostReq.getDeviceKeys().getDevEUI();
+        if (StringUtils.isBlank(dev_eui)){
+            log.error("Post deviceKey error,lack of dev_eui|{}",JSONUtils.beanToJson(deviceKeysPostReq));
+            return false;
+        }
+        try {
+            String resp = sendHttpsPost(domain,API_PATH+"/"+dev_eui+"/"+"keys",account,password,null,deviceKeysPostReq,String.class);
+            log.info("Post deviceKey success|dev_eui:{}|respMsg:{}",dev_eui,resp);
+        }catch (Exception postE){
+            String errorMsg = postE.getMessage();
+            if (errorMsg.contains("object already exists")){
+                if (deleteWhenExist){
+                    try {
+                        String delResp = deleteDeviceKey(dev_eui, domain, account, password);
+                        log.info("Delete device when exist|devEui:{}|respMsg:{}",dev_eui,delResp);
+                    }catch (Exception deleteE){
+                        String deleteErrorMsg = deleteE.getMessage();
+                        log.error("Delete device error when post exist|{}|{}", dev_eui, deleteErrorMsg);
+                        return false;
+                    }
+                    try {
+                        String reAddResp = sendHttpsPost(domain,API_PATH+"/"+dev_eui+"/"+"keys",account,password,null,deviceKeysPostReq,String.class);
+                        log.info("ReAdd device|devEui:{}|respMsg:{}",dev_eui,reAddResp);
+                        return true;
+                    }catch (Exception reAddE){
+                        String reAddErrorMsg = reAddE.getMessage();
+                        log.error("ReAdd device({}) error|{}", dev_eui, reAddErrorMsg);
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public String putDeviceKey(DeviceKeysPutReq deviceKeysPutReq,String domain, String account, String password){
+        String dev_eui = deviceKeysPutReq.getDeviceKeys().getDevEUI();
+        if (StringUtils.isBlank(dev_eui)){
+            log.error("Put deviceKey lack of dev_eui|{}|{}|{}|{}",JSONUtils.beanToJson(deviceKeysPutReq),domain,account,password);
+            return null;
+        }
+        return sendHttpsPut(domain,API_PATH+"/"+dev_eui+"/"+"keys",account,password,null,deviceKeysPutReq,String.class);
+    }
+
+    /**
+     * DELETE /api/devices/{dev_eui}/keys
+     */
+    public String deleteDeviceKey(String dev_eui,String domain, String account, String password){
+        return sendHttpsDelete(domain,API_PATH+"/"+dev_eui+"/"+"keys",account,password,null,null,String.class);
+    }
 }
