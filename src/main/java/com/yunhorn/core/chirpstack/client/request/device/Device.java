@@ -29,7 +29,7 @@ public class Device {
     private String name;
     private int referenceAltitude = 0;
     private boolean skipFCntCheck = true;
-    private Map<String,String> tags;//name
-    private Map<String,String> variables;//value
+    private Map<String,String> tags;//name value
+    private Map<String,String> variables;//name value
 
 }

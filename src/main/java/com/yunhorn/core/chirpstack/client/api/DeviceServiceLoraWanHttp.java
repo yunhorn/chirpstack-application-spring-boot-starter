@@ -136,6 +136,9 @@ public class DeviceServiceLoraWanHttp extends BaseServiceLoraWanHttp {
         return sendHttpsDelete(domain,API_PATH+"/"+dev_eui,account,password,null,null,String.class);
     }
 
+    /**
+     * PUT /api/devices/{device.dev_eui}
+     */
     public String put(DevicePutReq devicePutReq,String domain, String account, String password){
         if (StringUtils.isBlank(devicePutReq.getDevice().getDevEUI())){
             log.error("Put device lack of dev_eui|{}|{}|{}|{}",JSONUtils.beanToJson(devicePutReq),domain,account,password);
@@ -145,6 +148,9 @@ public class DeviceServiceLoraWanHttp extends BaseServiceLoraWanHttp {
     }
 
 
+    /**
+     * GET /api/devices/{dev_eui}
+     */
     public DeviceGetInfoResp get(String dev_eui, String domain, String account, String password){
         return sendHttpsGet(domain,API_PATH+"/"+dev_eui,account,password,null,null,DeviceGetInfoResp.class);
     }
@@ -195,6 +201,9 @@ public class DeviceServiceLoraWanHttp extends BaseServiceLoraWanHttp {
         return true;
     }
 
+    /**
+     * PUT /api/devices/{device_keys.dev_eui}/keys
+     */
     public String putDeviceKey(DeviceKeysPutReq deviceKeysPutReq,String domain, String account, String password){
         String dev_eui = deviceKeysPutReq.getDeviceKeys().getDevEUI();
         if (StringUtils.isBlank(dev_eui)){
