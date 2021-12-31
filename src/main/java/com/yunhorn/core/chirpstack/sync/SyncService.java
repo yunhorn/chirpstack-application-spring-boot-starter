@@ -12,6 +12,7 @@ import com.yunhorn.core.chirpstack.client.request.serviceprofile.ServiceProfileG
 import com.yunhorn.core.chirpstack.client.response.application.ApplicationsGetInfoResp;
 import com.yunhorn.core.chirpstack.client.response.application.ApplicationsGetResp;
 import com.yunhorn.core.chirpstack.client.response.application.ApplicationsGetResult;
+import com.yunhorn.core.chirpstack.client.response.application.ApplicationsPostResp;
 import com.yunhorn.core.chirpstack.client.response.organization.OrganizationGetResp;
 import com.yunhorn.core.chirpstack.client.response.organization.OrganizationGetResult;
 import com.yunhorn.core.chirpstack.client.response.serviceprofile.ServiceProfileGetResp;
@@ -89,10 +90,13 @@ public class SyncService {
                 }
             }else {
                 Application targetApplication = sourceApplicationInfo.getApplication().copyProperties(targetOrganizationID,targetServiceProfileId,false);
-                applicationServiceLoraWanHttp.post(new ApplicationsPostReq(targetApplication),targetDomain,targetAccount,targetPassword);
-                log.info("Insert Application to target chirpStack|{}",JSONUtils.beanToJson(targetApplication));
+                ApplicationsPostResp applicationsPostResp = applicationServiceLoraWanHttp.post(new ApplicationsPostReq(targetApplication),targetDomain,targetAccount,targetPassword);
+                log.info("Insert Application to target chirpStack|insertObj:{}|resp:{}",JSONUtils.beanToJson(targetApplication),JSONUtils.beanToJson(applicationsPostResp));
             }
         }
+    }
+
+    public void syncDevice(){
 
     }
 }

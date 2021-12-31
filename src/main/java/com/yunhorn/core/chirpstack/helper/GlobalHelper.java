@@ -13,6 +13,12 @@ public class GlobalHelper {
 
     public static final String CACHE_KEY_SEPARATOR = ":";
 
+    public static final String HOUR = "hour";
+
+    public static final String MINUTE = "minute";
+
+    public static final String DAY = "day";
+
     public static String getCacheKey(String prefix,String... keys){
         return getKey(prefix,CACHE_KEY_SEPARATOR,keys);
     }

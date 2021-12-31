@@ -27,6 +27,6 @@ public class UserInfo {
     private String targetDomain;
     @Value("${chirpStack.target.organizationName:}")
     private String targetOrganizationName;
-    @Value("${chirpStack.target.serviceProfile:}")
-    private String targetServiceProfile;
+    @Value("${chirpStack.target.serviceProfileName:}")
+    private String targetServiceProfileName;
 }
