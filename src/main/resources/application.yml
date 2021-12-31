@@ -1,1 +1,16 @@
-
+chirpStack:
+  source:
+    account:
+    password:
+    domain:
+    organizationName:
+  target:
+    account:
+    password:
+    domain:
+    organizationName:
+    serviceProfileName:
+  scheduled:
+    enable: false
+    duration: 0
+    durationUnit:
