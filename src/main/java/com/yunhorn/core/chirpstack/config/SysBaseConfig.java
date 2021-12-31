@@ -19,7 +19,7 @@ public class SysBaseConfig {
     //配置定时任务执行周期
     @Value("chirpStack.scheduled.duration:0")
     private Integer duration = 0;//执行周期时长
-    @Value("chirpStack.scheduled.duration.unit:")
+    @Value("chirpStack.scheduled.durationUnit:")
     private String durationUnit = null;//执行周期单位
 
     public TimeUnit getDurationUnit(){
