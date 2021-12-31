@@ -13,6 +13,8 @@ public class GlobalHelper {
 
     public static final String CACHE_KEY_SEPARATOR = ":";
 
+    public static final String SECOND = "second";
+
     public static final String HOUR = "hour";
 
     public static final String MINUTE = "minute";
