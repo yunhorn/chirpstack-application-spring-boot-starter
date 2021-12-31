@@ -1,5 +1,6 @@
 package com.yunhorn.core.chirpstack.sync;
 
+import com.google.common.collect.Lists;
 import com.yunhorn.core.chirpstack.client.api.ApplicationServiceLoraWanHttp;
 import com.yunhorn.core.chirpstack.client.api.OrganizationServiceLoraWanHttp;
 import com.yunhorn.core.chirpstack.client.api.ServiceProfileServiceLoraWanHttp;
@@ -22,6 +23,8 @@ import com.yunhorn.core.chirpstack.util.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -76,6 +79,10 @@ public class SyncService {
 
         //比较name 如果name相同 则认为是同一application 需要进行比较
         Map<String,ApplicationsGetResult> targetApplicationMap = targetApplicationsResp.getResult().stream().collect(Collectors.toMap(ApplicationsGetResult::getName, Function.identity()));
+        int updateCount = 0;
+        List<String> updateApplicationNames = Lists.newArrayList();
+        int insertCount = 0;
+        List<String> insertApplicationNames = Lists.newArrayList();
         for (ApplicationsGetResult sourceApplicationsGetResult : sourceApplicationsResp.getResult()) {
             ApplicationsGetResult targetApplicationGetResult = targetApplicationMap.get(sourceApplicationsGetResult.getName());
             ApplicationsGetInfoResp sourceApplicationInfo = applicationServiceLoraWanHttp.get(sourceApplicationsGetResult.getId(),sourceDomain,sourceAccount,sourcePassword);
@@ -87,12 +94,26 @@ public class SyncService {
                     Application targetApplication = sourceApplication.copyProperties(targetOrganizationID,targetServiceProfileId,true);
                     applicationServiceLoraWanHttp.put(new ApplicationsPutReq(targetApplication),targetDomain,targetAccount,targetPassword);
                     log.info("Update target chirpStack Application|Before update:{}|After update:{}", JSONUtils.beanToJson(targetApplicationOriginal),JSONUtils.beanToJson(targetApplication));
+                    updateCount ++;
+                    updateApplicationNames.add(targetApplicationGetResult.getName());
                 }
             }else {
                 Application targetApplication = sourceApplicationInfo.getApplication().copyProperties(targetOrganizationID,targetServiceProfileId,false);
                 ApplicationsPostResp applicationsPostResp = applicationServiceLoraWanHttp.post(new ApplicationsPostReq(targetApplication),targetDomain,targetAccount,targetPassword);
                 log.info("Insert Application to target chirpStack|insertObj:{}|resp:{}",JSONUtils.beanToJson(targetApplication),JSONUtils.beanToJson(applicationsPostResp));
+                insertCount ++;
+                insertApplicationNames.add(targetApplication.getName());
             }
+        }
+        if (updateCount>0 && insertCount>0){
+            log.info("SyncApplication success! Update application count :{},their applicationNames are {} || Insert application count :{},their applicationNames are {}"
+                    ,updateCount,JSONUtils.beanToJson(updateApplicationNames),insertCount,JSONUtils.beanToJson(insertApplicationNames));
+        }else if (updateCount>0){
+            log.info("SyncApplication success! Update application count :{},their applicationNames are {} ",updateCount,JSONUtils.beanToJson(updateApplicationNames));
+        }else if (insertCount>0){
+            log.info("SyncApplication success! Insert application count :{},their applicationNames are {}",insertCount,JSONUtils.beanToJson(insertApplicationNames));
+        }else {
+            log.info("Scan application success! No syncable application found!");
         }
     }
 
