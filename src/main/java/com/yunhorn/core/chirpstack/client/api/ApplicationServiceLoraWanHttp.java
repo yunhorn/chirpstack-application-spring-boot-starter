@@ -81,45 +81,5 @@ public class ApplicationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
         return sendHttpsGet(domain,API_PATH+"/"+id,account,password,null,null,ApplicationsGetInfoResp.class);
     }
 
-    public static void main(String[] args) {
-//        ApplicationsPostReq applicationsPostReq = new ApplicationsPostReq();
-//        Application application = new Application();
-//        application.setDescription("this is a test application");
-//        application.setName("testApplication");
-//        application.setServiceProfileID("663ea3c5-b29f-46e0-a67d-e67f304d92a8");
-//        application.setOrganizationID("1");
-//        applicationsPostReq.setApplication(application);
-//        Map<String,Map> reqMap = Maps.newHashMap();
-//        if (applicationsPostReq!=null && applicationsPostReq.getApplication()!=null){
-//            Application applicationReq = applicationsPostReq.getApplication();
-//            String applicationJson = JSONUtils.beanToJson(applicationReq);
-//            Map<String, Object> applicationMap = JSONUtils.jsonToMap(applicationJson);
-//            reqMap.put("application",applicationMap);
-//        }
-//        ApplicationServiceLoraWanHttp applicationServiceLoraWanHttp = new ApplicationServiceLoraWanHttp();
-//        ApplicationsPostResp applicationsPostResp = applicationServiceLoraWanHttp.sendHttpsPost("http://localhost:8080","/api/applications",null,applicationsPostReq,ApplicationsPostResp.class);
-//        ApplicationsPostResp applicationsPostResp = applicationServiceLoraWanHttp.post(applicationsPostReq,"http://localhost:8080","admin","admin");
-
-//        System.out.println(applicationsPostResp);
-
-//        ApplicationsPutReq applicationsPutReq = new ApplicationsPutReq();
-//        Application application = new Application();
-//        application.setId("21");
-//        application.setDescription("this is a test application11");
-//        application.setName("testApplication11");
-//        application.setServiceProfileID("663ea3c5-b29f-46e0-a67d-e67f304d92a8");
-//        application.setOrganizationID("1");
-//        applicationsPutReq.setApplication(application);
-//        ApplicationServiceLoraWanHttp applicationServiceLoraWanHttp = new ApplicationServiceLoraWanHttp();
-//        applicationServiceLoraWanHttp.put(applicationsPutReq,"http://localhost:8080",null,null);
-
-//        ApplicationServiceLoraWanHttp applicationServiceLoraWanHttp = new ApplicationServiceLoraWanHttp();
-//        applicationServiceLoraWanHttp.get("21","http://localhost:8080",null,null);
-
-        ApplicationsGetReq applicationsGetReq = new ApplicationsGetReq();
-        ApplicationServiceLoraWanHttp applicationServiceLoraWanHttp = new ApplicationServiceLoraWanHttp();
-        applicationServiceLoraWanHttp.get(applicationsGetReq,"http://localhost:8080",null,null);
-    }
-
 
 }

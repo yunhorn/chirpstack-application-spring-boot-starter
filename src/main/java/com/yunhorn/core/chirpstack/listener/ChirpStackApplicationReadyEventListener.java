@@ -33,6 +33,8 @@ public class ChirpStackApplicationReadyEventListener implements ApplicationListe
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
 
+        log.info("chirpStack-syncer applicationReadyEvent begin");
+
         Map<String,String> userInfoMap = JSONUtils.jsonToStrMap(JSONUtils.beanToJson(userInfo));
         for (Map.Entry<String, String> userInfoEntry : userInfoMap.entrySet()) {
             String userInfoName = userInfoEntry.getKey();
@@ -49,6 +51,7 @@ public class ChirpStackApplicationReadyEventListener implements ApplicationListe
             log.error("SysBaseConfig of Duration less than or equal to 0");
             throw new RuntimeException("SysBaseConfig Incomplete configuration");
         }
+        log.info("chirpStack-syncer Check the configuration passed!");
         chirpStackSyncTask.syncApplication();
     }
 }
