@@ -22,7 +22,7 @@ public class ChirpStackBaseTask {
 //    private Map<String,Integer> countDownMap = Maps.newHashMap();//存倒计时的map
 
     public boolean taskSwitch() {
-        return sysBaseConfig.getEnable();
+        return sysBaseConfig.isEnable();
     }
 
     public Integer getDuration(){
