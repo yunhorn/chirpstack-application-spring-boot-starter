@@ -40,18 +40,28 @@ public class ChirpStackApplicationReadyEventListener implements ApplicationListe
             String userInfoName = userInfoEntry.getKey();
             String userInfoValue = userInfoEntry.getValue();
             if (StringUtils.isBlank(userInfoValue)){
-                log.error("{} is not configured",userInfoName);
-                throw new RuntimeException("UserInfo Incomplete configuration");
+                log.error(userInfoName+" is not configured",new Exception("UserInfo Incomplete configuration"));
+                return;
             }
         }
         if (sysBaseConfig.getDurationUnit()==null){
-            log.error("SysBaseConfig lack of DurationUnit");
-            throw new RuntimeException("SysBaseConfig Incomplete configuration");
+            log.error("SysBaseConfig lack of DurationUnit",new Exception("SysBaseConfig Incomplete configuration"));
+            return;
         }else if (sysBaseConfig.getDuration()<=0){
-            log.error("SysBaseConfig of Duration less than or equal to 0");
-            throw new RuntimeException("SysBaseConfig Incomplete configuration");
+            log.error("SysBaseConfig of Duration less than or equal to 0",new Exception("SysBaseConfig Incomplete configuration"));
+            return;
         }
         log.info("chirpStack-syncer Check the configuration passed!");
+        if (sysBaseConfig.isApplicationEnable() && StringUtils.isBlank(userInfo.getTargetServiceProfileName())){
+            //如果开启了application同步 但没有配置同步application到目标平台要用到的ServiceProfileName 则打印异常堆栈
+            log.error("Sync application lack of targetServiceProfileName");
+            return;
+        }if (sysBaseConfig.isDeviceEnable() && StringUtils.isBlank(userInfo.getTargetDeviceProfileName())){
+            //如果开启了device同步 但没有配置同步device到目标平台要用到的DeviceProfileName 则打印异常堆栈
+            log.error("Sync device lack of targetDeviceProfileName");
+            return;
+        }
         chirpStackSyncTask.syncApplication();
+        chirpStackSyncTask.syncDevice();
     }
 }

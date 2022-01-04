@@ -10,7 +10,17 @@ chirpStack:
     domain:
     organizationName:
     serviceProfileName:
+    deviceProfileName:
   scheduled:
-    enable: false
-    duration: 0
-    durationUnit:
+    application:
+      enable: false
+      duration: 0
+      durationUnit:
+    device:
+      enable: false
+        duration: 0
+        durationUnit:
+  sync:
+    device:
+      applicationName:
+      removeTargetRedundantDevice: false

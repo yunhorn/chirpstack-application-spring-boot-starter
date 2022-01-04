@@ -29,4 +29,6 @@ public class UserInfo {
     private String targetOrganizationName;
     @Value("${chirpStack.target.serviceProfileName:}")
     private String targetServiceProfileName;
+    @Value("${chirpStack.target.deviceProfileName:}")
+    private String targetDeviceProfileName;
 }

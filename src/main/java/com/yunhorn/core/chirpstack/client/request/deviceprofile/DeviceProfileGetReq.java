@@ -29,4 +29,12 @@ public class DeviceProfileGetReq {
     private String organizationID;
     private String applicationID;
 
+    public DeviceProfileGetReq(){
+
+    }
+
+    public DeviceProfileGetReq(String organizationID){
+        this.organizationID = organizationID;
+    }
+
 }

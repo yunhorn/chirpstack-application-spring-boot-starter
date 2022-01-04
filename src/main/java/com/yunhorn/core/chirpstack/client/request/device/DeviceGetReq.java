@@ -38,4 +38,10 @@ public class DeviceGetReq {
     private String search;
     private String multicastGroupID;
     private String serviceProfileID;
+    public DeviceGetReq(){
+
+    }
+    public DeviceGetReq(String applicationID){
+        this.applicationID = applicationID;
+    }
 }

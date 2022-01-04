@@ -29,7 +29,12 @@ public class BaseServiceLoraWanHttp {
     private Map<String,String> tokenMap = Maps.newHashMap();
 
     protected <T> T sendHttpsGet(String domain,String path,String account,String password, Map<String,String> headerMap,Map<String, String> params,Class<T> responseType){
-        return request(domain,path,account,password,headerMap,params,responseType,HttpMethod.GET);
+        try {
+            return request(domain,path,account,password,headerMap,params,responseType,HttpMethod.GET);
+        }catch (Exception e){
+            log.error("SendHttpsGet error",e);
+            return null;
+        }
     }
 
     private <T> T request(String domain, String path,String account,String password, Map<String,String> headerMap, Object reqBody,Class<T> responseType,HttpMethod httpMethod){

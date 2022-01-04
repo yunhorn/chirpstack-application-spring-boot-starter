@@ -1,7 +1,9 @@
 package com.yunhorn.core.chirpstack.task;
 
+import com.yunhorn.core.chirpstack.config.DeviceSyncConfig;
 import com.yunhorn.core.chirpstack.config.UserInfo;
-import com.yunhorn.core.chirpstack.dto.SyncReq;
+import com.yunhorn.core.chirpstack.dto.ApplicationSyncReq;
+import com.yunhorn.core.chirpstack.dto.DeviceSyncReq;
 import com.yunhorn.core.chirpstack.sync.SyncService;
 import com.yunhorn.core.chirpstack.util.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -26,21 +28,41 @@ public class ChirpStackSyncTask extends ChirpStackBaseTask {
     @Autowired
     private SyncService syncService;
 
+    @Autowired
+    private DeviceSyncConfig deviceSyncConfig;
+
     public static ScheduledExecutorService syncScheduledThreadPool = new ScheduledThreadPoolExecutor(1);
 
     public void syncApplication(){
-        if (!taskSwitch()){
+        if (!taskSwitch("syncApplication")){
             return;
         }
         syncScheduledThreadPool.schedule(()->{
-            SyncReq syncReq = new SyncReq();
+            ApplicationSyncReq applicationSyncReq = new ApplicationSyncReq();
             try {
-                BeanUtils.copyProperties(syncReq,userInfo);
+                BeanUtils.copyProperties(applicationSyncReq,userInfo);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                log.error("flushDeviceActive copyProperties error|{}|{}", JSONUtils.beanToJson(syncReq),JSONUtils.beanToJson(userInfo));
+                log.error("SyncApplication copyProperties error|{}|{}", JSONUtils.beanToJson(applicationSyncReq),JSONUtils.beanToJson(userInfo));
                 return;
             }
-            syncService.syncApplication(syncReq);
+            syncService.syncApplication(applicationSyncReq);
+        },getDuration(),getDurationUnit());
+    }
+
+    public void syncDevice(){
+        if (!taskSwitch("syncDevice")){
+            return;
+        }
+        syncScheduledThreadPool.schedule(()->{
+            DeviceSyncReq deviceSyncReq = new DeviceSyncReq();
+            try {
+                BeanUtils.copyProperties(deviceSyncReq,userInfo);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                log.error("SyncDevice copyProperties error|{}|{}", JSONUtils.beanToJson(deviceSyncReq),JSONUtils.beanToJson(userInfo));
+                return;
+            }
+            deviceSyncReq.setApplicationNames(deviceSyncConfig.getApplicationNames());
+            syncService.syncDevice(deviceSyncReq);
         },getDuration(),getDurationUnit());
     }
 

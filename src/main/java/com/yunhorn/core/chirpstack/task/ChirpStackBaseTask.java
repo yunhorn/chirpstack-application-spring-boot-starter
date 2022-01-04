@@ -21,8 +21,13 @@ public class ChirpStackBaseTask {
 
 //    private Map<String,Integer> countDownMap = Maps.newHashMap();//存倒计时的map
 
-    public boolean taskSwitch() {
-        return sysBaseConfig.isEnable();
+    public boolean taskSwitch(String taskName) {
+        if ("syncApplication".equals(taskName)){
+            return sysBaseConfig.isApplicationEnable();
+        }else if ("syncDevice".equals(taskName)){
+            return sysBaseConfig.isDeviceEnable();
+        }
+        return false;
     }
 
     public Integer getDuration(){

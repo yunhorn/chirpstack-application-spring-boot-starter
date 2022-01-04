@@ -1,49 +1,46 @@
-//package io.github.yunhorn.chirpstackappsyncer.client.api;
-//
-//import com.google.common.collect.Maps;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.Map;
-//
-///**
-// * @author ljm
-// * @date 2021/2/24 16:18
-// */
-//@Service
-//@Slf4j
-//public class DeviceProfileServiceLoraWanHttp extends BaseServiceLoraWanHttp {
-//
-//    /**
-//     * GET /api/device-profiles
-//     */
-//    public DeviceProfileGetResp get(DeviceProfileGetReq deviceProfileGetReq,String domain,String account,String password){
-//        Map<String, String> params = Maps.newHashMap();
-//        if (deviceProfileGetReq!=null){
-//            if (StringUtils.isNotBlank(deviceProfileGetReq.getLimit())){
-//                params.put("limit",deviceProfileGetReq.getLimit());
-//            }
-//            if (StringUtils.isNotBlank(deviceProfileGetReq.getOffset())){
-//                params.put("offset",deviceProfileGetReq.getOffset());
-//            }
-//            if (StringUtils.isNotBlank(deviceProfileGetReq.getOrganizationID())){
-//                params.put("organizationID",deviceProfileGetReq.getOrganizationID());
-//            }
-//            if (StringUtils.isNotBlank(deviceProfileGetReq.getApplicationID())){
-//                params.put("applicationID",deviceProfileGetReq.getApplicationID());
-//            }
-//        }
-//        Map<String, String> headerMap = getAuthHeadMap(domain,account,password,false);
-//        String resp = sendHttpsGet(domain,"/api/device-profiles",headerMap,params);
-//        DeviceProfileGetResp deviceProfileGetResp = new DeviceProfileGetResp();
-//        try {
-//            deviceProfileGetResp = (DeviceProfileGetResp) JSONUtils.jsonToBean(resp,DeviceProfileGetResp.class);
-//        }catch (Exception e){
-//            log.error("jsonToBean DeviceProfileGetResp error",e);
-//        }
-//        return deviceProfileGetResp;
-//    }
-//
+package com.yunhorn.core.chirpstack.client.api;
+
+import com.google.common.collect.Maps;
+import com.yunhorn.core.chirpstack.client.api.BaseServiceLoraWanHttp;
+import com.yunhorn.core.chirpstack.client.request.deviceprofile.DeviceProfileGetReq;
+import com.yunhorn.core.chirpstack.client.response.deviceprofile.DeviceProfileGetResp;
+import com.yunhorn.core.chirpstack.util.JSONUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+
+/**
+ * @author ljm
+ * @date 2021/2/24 16:18
+ */
+@Service
+@Slf4j
+public class DeviceProfileServiceLoraWanHttp extends BaseServiceLoraWanHttp {
+
+    private final String API_PATH = "/api/device-profiles";
+
+    /**
+     * GET /api/device-profiles
+     */
+    public DeviceProfileGetResp get(DeviceProfileGetReq deviceProfileGetReq, String domain, String account, String password){
+        Map<String, String> params = Maps.newHashMap();
+        if (deviceProfileGetReq!=null){
+            String deviceProfileGetReqJson = JSONUtils.beanToJson(deviceProfileGetReq);
+            params = JSONUtils.jsonToStrMap(deviceProfileGetReqJson);
+            if (params==null){
+                return null;
+            }
+            if (StringUtils.isBlank(deviceProfileGetReq.getLimit()) && StringUtils.isBlank(deviceProfileGetReq.getOffset())){
+                DeviceProfileGetResp deviceProfileGetResp = sendHttpsGet(domain,API_PATH,account,password,null,params,DeviceProfileGetResp.class);
+                String totalCount = deviceProfileGetResp.getTotalCount();
+                params.put("limit",totalCount);
+            }
+        }
+        return sendHttpsGet(domain,API_PATH,account,password,null,params,DeviceProfileGetResp.class);
+    }
+
 //    /**
 //     * POST /api/device-profiles
 //     */
@@ -79,4 +76,4 @@
 //        }
 //        return deviceProfileGetInfoResp;
 //    }
-//}
+}

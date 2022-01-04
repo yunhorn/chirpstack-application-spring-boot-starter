@@ -9,4 +9,10 @@ import lombok.Data;
 @Data
 public class DevicePutReq {
     private Device device;
+    public DevicePutReq(){
+
+    }
+    public DevicePutReq(Device device){
+        this.device = device;
+    }
 }

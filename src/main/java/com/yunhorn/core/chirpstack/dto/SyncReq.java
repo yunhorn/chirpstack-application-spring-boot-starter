@@ -16,5 +16,4 @@ public class SyncReq {
     private String targetPassword;
     private String targetDomain;
     private String targetOrganizationName;
-    private String targetServiceProfileName;
 }

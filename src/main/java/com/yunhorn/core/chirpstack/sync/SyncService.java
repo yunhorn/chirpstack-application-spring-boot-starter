@@ -1,24 +1,34 @@
 package com.yunhorn.core.chirpstack.sync;
 
 import com.google.common.collect.Lists;
-import com.yunhorn.core.chirpstack.client.api.ApplicationServiceLoraWanHttp;
-import com.yunhorn.core.chirpstack.client.api.OrganizationServiceLoraWanHttp;
-import com.yunhorn.core.chirpstack.client.api.ServiceProfileServiceLoraWanHttp;
+import com.google.common.collect.Maps;
+import com.yunhorn.core.chirpstack.client.api.*;
 import com.yunhorn.core.chirpstack.client.request.application.Application;
 import com.yunhorn.core.chirpstack.client.request.application.ApplicationsGetReq;
 import com.yunhorn.core.chirpstack.client.request.application.ApplicationsPostReq;
 import com.yunhorn.core.chirpstack.client.request.application.ApplicationsPutReq;
+import com.yunhorn.core.chirpstack.client.request.device.Device;
+import com.yunhorn.core.chirpstack.client.request.device.DeviceGetReq;
+import com.yunhorn.core.chirpstack.client.request.device.DevicePostReq;
+import com.yunhorn.core.chirpstack.client.request.device.DevicePutReq;
+import com.yunhorn.core.chirpstack.client.request.deviceprofile.DeviceProfileGetReq;
 import com.yunhorn.core.chirpstack.client.request.organization.OrganizationGetReq;
 import com.yunhorn.core.chirpstack.client.request.serviceprofile.ServiceProfileGetReq;
 import com.yunhorn.core.chirpstack.client.response.application.ApplicationsGetInfoResp;
 import com.yunhorn.core.chirpstack.client.response.application.ApplicationsGetResp;
 import com.yunhorn.core.chirpstack.client.response.application.ApplicationsGetResult;
 import com.yunhorn.core.chirpstack.client.response.application.ApplicationsPostResp;
+import com.yunhorn.core.chirpstack.client.response.device.DeviceGetInfoResp;
+import com.yunhorn.core.chirpstack.client.response.device.DeviceGetResp;
+import com.yunhorn.core.chirpstack.client.response.device.DeviceGetResult;
+import com.yunhorn.core.chirpstack.client.response.deviceprofile.DeviceProfileGetResp;
+import com.yunhorn.core.chirpstack.client.response.deviceprofile.DeviceProfileGetResult;
 import com.yunhorn.core.chirpstack.client.response.organization.OrganizationGetResp;
 import com.yunhorn.core.chirpstack.client.response.organization.OrganizationGetResult;
 import com.yunhorn.core.chirpstack.client.response.serviceprofile.ServiceProfileGetResp;
 import com.yunhorn.core.chirpstack.client.response.serviceprofile.ServiceProfileGetResult;
-import com.yunhorn.core.chirpstack.dto.SyncReq;
+import com.yunhorn.core.chirpstack.dto.ApplicationSyncReq;
+import com.yunhorn.core.chirpstack.dto.DeviceSyncReq;
 import com.yunhorn.core.chirpstack.util.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,17 +56,22 @@ public class SyncService {
     @Autowired
     private ServiceProfileServiceLoraWanHttp serviceProfileServiceLoraWanHttp;
 
-    public void syncApplication(SyncReq syncReq){
-        String sourceDomain = syncReq.getSourceDomain();
-        String sourceAccount = syncReq.getSourceAccount();
-        String sourcePassword = syncReq.getSourcePassword();
-        String targetDomain = syncReq.getTargetDomain();
-        String targetAccount = syncReq.getTargetAccount();
-        String targetPassword = syncReq.getTargetPassword();
-        String sourceOrganizationName = syncReq.getSourceOrganizationName();
-        String targetOrganizationName = syncReq.getTargetOrganizationName();
-        String targetServiceProfileName = syncReq.getTargetServiceProfileName();
+    @Autowired
+    private DeviceServiceLoraWanHttp deviceServiceLoraWanHttp;
 
+    @Autowired
+    private DeviceProfileServiceLoraWanHttp deviceProfileServiceLoraWanHttp;
+
+    public void syncApplication(ApplicationSyncReq applicationSyncReq){
+        String sourceDomain = applicationSyncReq.getSourceDomain();
+        String sourceAccount = applicationSyncReq.getSourceAccount();
+        String sourcePassword = applicationSyncReq.getSourcePassword();
+        String targetDomain = applicationSyncReq.getTargetDomain();
+        String targetAccount = applicationSyncReq.getTargetAccount();
+        String targetPassword = applicationSyncReq.getTargetPassword();
+        String sourceOrganizationName = applicationSyncReq.getSourceOrganizationName();
+        String targetOrganizationName = applicationSyncReq.getTargetOrganizationName();
+        String targetServiceProfileName = applicationSyncReq.getTargetServiceProfileName();
         OrganizationGetResp sourceOrganizationGetResp = organizationServiceLoraWanHttp.get(new OrganizationGetReq(),sourceDomain,sourceAccount,sourcePassword);
         String sourceOrganizationID = sourceOrganizationGetResp.getResult().stream().filter(organizationGetResult -> sourceOrganizationName.equals(organizationGetResult.getName())).findFirst().map(OrganizationGetResult::getId).orElse(null);
         OrganizationGetResp targetOrganizationGetResp = organizationServiceLoraWanHttp.get(new OrganizationGetReq(),targetDomain,targetAccount,targetPassword);
@@ -105,19 +120,114 @@ public class SyncService {
                 insertApplicationNames.add(targetApplication.getName());
             }
         }
-        if (updateCount>0 && insertCount>0){
-            log.info("SyncApplication success! Update application count :{},their applicationNames are {} || Insert application count :{},their applicationNames are {}"
-                    ,updateCount,JSONUtils.beanToJson(updateApplicationNames),insertCount,JSONUtils.beanToJson(insertApplicationNames));
-        }else if (updateCount>0){
-            log.info("SyncApplication success! Update application count :{},their applicationNames are {} ",updateCount,JSONUtils.beanToJson(updateApplicationNames));
-        }else if (insertCount>0){
-            log.info("SyncApplication success! Insert application count :{},their applicationNames are {}",insertCount,JSONUtils.beanToJson(insertApplicationNames));
+        if (updateCount>0 || insertCount>0){
+            if (updateCount>0){
+                log.info("SyncApplication success! Update application count :{},their applicationNames are {} ",updateCount,JSONUtils.beanToJson(updateApplicationNames));
+            }else {
+                log.info("SyncApplication success! Insert application count :{},their applicationNames are {}",insertCount,JSONUtils.beanToJson(insertApplicationNames));
+            }
         }else {
             log.info("Scan application success! No syncable application found!");
         }
     }
 
-    public void syncDevice(){
-
+    public void syncDevice(DeviceSyncReq deviceSyncReq){
+        String sourceDomain = deviceSyncReq.getSourceDomain();
+        String sourceAccount = deviceSyncReq.getSourceAccount();
+        String sourcePassword = deviceSyncReq.getSourcePassword();
+        String targetDomain = deviceSyncReq.getTargetDomain();
+        String targetAccount = deviceSyncReq.getTargetAccount();
+        String targetPassword = deviceSyncReq.getTargetPassword();
+        String sourceOrganizationName = deviceSyncReq.getSourceOrganizationName();
+        String targetOrganizationName = deviceSyncReq.getTargetOrganizationName();
+        String targetDeviceProfileName = deviceSyncReq.getTargetDeviceProfileName();
+        OrganizationGetResp sourceOrganizationGetResp = organizationServiceLoraWanHttp.get(new OrganizationGetReq(),sourceDomain,sourceAccount,sourcePassword);
+        String sourceOrganizationID = sourceOrganizationGetResp.getResult().stream().filter(organizationGetResult -> sourceOrganizationName.equals(organizationGetResult.getName())).findFirst().map(OrganizationGetResult::getId).orElse(null);
+        OrganizationGetResp targetOrganizationGetResp = organizationServiceLoraWanHttp.get(new OrganizationGetReq(),targetDomain,targetAccount,targetPassword);
+        String targetOrganizationID = targetOrganizationGetResp.getResult().stream().filter(organizationGetResult -> targetOrganizationName.equals(organizationGetResult.getName())).findFirst().map(OrganizationGetResult::getId).orElse(null);
+        if (sourceOrganizationID==null){
+            log.error("SourceOrganizationName Can't find the corresponding id");
+            return;
+        }else if (targetOrganizationID==null){
+            log.error("TargetOrganizationName Can't find the corresponding id");
+            return;
+        }
+        DeviceProfileGetResp targetDeviceProfileGetResp = deviceProfileServiceLoraWanHttp.get(new DeviceProfileGetReq(targetOrganizationID),targetDomain,targetAccount,targetPassword);
+        String targetDeviceProfileId = targetDeviceProfileGetResp.getResult().stream().filter(targetDeviceProfileGetResult->targetDeviceProfileGetResult.getName().equals(targetDeviceProfileName)).findFirst().map(DeviceProfileGetResult::getId).orElse(null);
+        if (targetDeviceProfileId==null){
+            log.error("TargetDeviceProfileName Can't find the corresponding id");
+            return;
+        }
+        ApplicationsGetResp sourceApplicationsResp = applicationServiceLoraWanHttp.get(new ApplicationsGetReq(sourceOrganizationID),sourceDomain,sourceAccount,sourcePassword);//查询源chirpStack的application数据
+        ApplicationsGetResp targetApplicationsResp = applicationServiceLoraWanHttp.get(new ApplicationsGetReq(targetOrganizationID),targetDomain,targetAccount,targetPassword);//查询目标chirpStack的application数据
+        Map<String,String> targetApplicationsResultMap = targetApplicationsResp.getResult().stream().collect(Collectors.toMap(ApplicationsGetResult::getName,ApplicationsGetResult::getId));
+        Map<String,String> deviceSyncApplicationMap = Maps.newHashMap();
+        if (!deviceSyncReq.getApplicationNames().isEmpty()){
+            Map<String,String> sourceApplicationsResultMap = sourceApplicationsResp.getResult().stream().collect(Collectors.toMap(ApplicationsGetResult::getName,ApplicationsGetResult::getId));
+            for (String applicationName : deviceSyncReq.getApplicationNames()) {
+                String sourceApplicationId = sourceApplicationsResultMap.get(applicationName);
+                String targetApplicationId = targetApplicationsResultMap.get(applicationName);
+                if (sourceApplicationId == null){
+                    log.error("Source organization "+sourceOrganizationName+" was not found the application named "+applicationName);
+                    continue;
+                }else if (targetApplicationId == null){
+                    log.error("Target organization "+targetOrganizationName+" was not found the application named "+applicationName);
+                    continue;
+                }
+                deviceSyncApplicationMap.put(sourceApplicationId,targetApplicationId);
+            }
+        }else {
+            for (ApplicationsGetResult sourceApplicationsGetResult : sourceApplicationsResp.getResult()) {
+                String sourceApplicationName = sourceApplicationsGetResult.getName();
+                String targetApplicationId = targetApplicationsResultMap.get(sourceApplicationName);
+                if (targetApplicationId!=null){
+                    deviceSyncApplicationMap.put(sourceApplicationsGetResult.getId(),targetApplicationId);
+                }
+            }
+        }
+        Map<String,String> sourceApplicationMap = sourceApplicationsResp.getResult().stream().collect(Collectors.toMap(ApplicationsGetResult::getId,ApplicationsGetResult::getName));
+        deviceSyncApplicationMap.forEach((deviceSyncSourceApplicationId,deviceSyncTargetApplicationId)->{
+            String sourceApplicationName = sourceApplicationMap.get(deviceSyncSourceApplicationId);
+            int updateCount = 0;
+            int insertCount = 0;
+            List<String> insertEUIs = Lists.newArrayList();
+            List<String> updateEUIs = Lists.newArrayList();
+            DeviceGetResp sourceDeviceGetResp = deviceServiceLoraWanHttp.get(new DeviceGetReq(deviceSyncSourceApplicationId),sourceDomain,sourceAccount,sourcePassword);
+            DeviceGetResp targetDeviceGetResp = deviceServiceLoraWanHttp.get(new DeviceGetReq(deviceSyncTargetApplicationId),targetDomain,targetAccount,targetPassword);
+            List<String> targetDeviceIdMap = targetDeviceGetResp.getResult().stream().map(DeviceGetResult::getDevEUI).collect(Collectors.toList());
+            for (DeviceGetResult sourceDeviceGetResult : sourceDeviceGetResp.getResult()) {
+                String syncDeviceId = sourceDeviceGetResult.getDevEUI();
+                DeviceGetInfoResp sourceDeviceGetInfoResp = deviceServiceLoraWanHttp.get(syncDeviceId,sourceDomain,sourceAccount,sourcePassword);
+                Device sourceDevice = sourceDeviceGetInfoResp.getDevice();
+                if (targetDeviceIdMap.contains(syncDeviceId)){
+                    DeviceGetInfoResp targetDeviceGetInfoResp = deviceServiceLoraWanHttp.get(syncDeviceId,targetDomain,targetAccount,targetPassword);
+                    Device targetDevice = targetDeviceGetInfoResp.getDevice();
+                    if (!sourceDevice.equals(targetDevice)){
+                        //源Device和目标Device的内容不一样
+                        Device newTargetDevice = sourceDevice.copyProperties(deviceSyncTargetApplicationId,targetDeviceProfileId);
+                        deviceServiceLoraWanHttp.put(new DevicePutReq(newTargetDevice),targetDomain,targetAccount,targetPassword);
+                        log.info("Update target chirpStack Application's Device|Before update:{}|After update:{}", JSONUtils.beanToJson(targetDevice),JSONUtils.beanToJson(newTargetDevice));
+                        updateCount ++;
+                        updateEUIs.add(newTargetDevice.getDevEUI());
+                    }
+                }else {
+                    //目标application不存在该设备 添加
+                    Device targetDevice = sourceDevice.copyProperties(deviceSyncTargetApplicationId,targetDeviceProfileId);
+                    boolean isSuccess = deviceServiceLoraWanHttp.post(new DevicePostReq(targetDevice),targetDomain,targetAccount,targetPassword,true);
+                    log.info("Insert Device to target chirpStack|insertObj:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),isSuccess);
+                    insertCount ++;
+                    insertEUIs.add(targetDevice.getDevEUI());
+                }
+            }
+            if (updateCount >0 || insertCount>0){
+                if (updateCount >0){
+                    log.info("Sync {}'s device success! Update device count :{},their DevEUIs are {} ",sourceApplicationName,updateCount,JSONUtils.beanToJson(updateEUIs));
+                }else {
+                    log.info("Sync {}'s device success! Insert device count :{},their DevEUIs are {}",sourceApplicationName,insertCount,JSONUtils.beanToJson(insertEUIs));
+                }
+            }else {
+                log.info("Scan {}'s device success! No syncable device found!",sourceApplicationName);
+            }
+        });
     }
 }

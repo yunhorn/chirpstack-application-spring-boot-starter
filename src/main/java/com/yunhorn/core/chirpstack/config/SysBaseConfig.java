@@ -14,8 +14,10 @@ import java.util.concurrent.TimeUnit;
 @Data
 @Configuration
 public class SysBaseConfig {
-    @Value("${chirpStack.scheduled.enable:false}")
-    private boolean enable = false;
+    @Value("${chirpStack.scheduled.application.enable:false}")
+    private boolean applicationEnable = false;
+    @Value("${chirpStack.scheduled.device.enable:false}")
+    private boolean deviceEnable = false;
     //配置定时任务执行周期
     @Value("${chirpStack.scheduled.duration:0}")
     private Integer duration = 0;//执行周期时长
