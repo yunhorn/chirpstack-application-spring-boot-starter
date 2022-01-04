@@ -2,16 +2,12 @@ package com.yunhorn.core.chirpstack.task;
 
 import com.yunhorn.core.chirpstack.config.UserInfo;
 import com.yunhorn.core.chirpstack.dto.SyncReq;
-import com.yunhorn.core.chirpstack.helper.GlobalHelper;
 import com.yunhorn.core.chirpstack.sync.SyncService;
 import com.yunhorn.core.chirpstack.util.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -23,11 +19,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 @Component
 @Slf4j
 public class ChirpStackSyncTask extends ChirpStackBaseTask {
-
-    @PostConstruct
-    public void a(){
-        log.info("chirpStack-syncer applicationReadyEvent begin");
-    }
 
     @Autowired
     private UserInfo userInfo;
