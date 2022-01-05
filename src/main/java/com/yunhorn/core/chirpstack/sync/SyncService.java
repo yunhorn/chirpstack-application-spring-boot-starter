@@ -2,6 +2,7 @@ package com.yunhorn.core.chirpstack.sync;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.yunhorn.core.chirpstack.client.api.*;
 import com.yunhorn.core.chirpstack.client.request.application.Application;
 import com.yunhorn.core.chirpstack.client.request.application.ApplicationsGetReq;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -58,6 +60,7 @@ public class SyncService {
     private DeviceProfileServiceLoraWanHttp deviceProfileServiceLoraWanHttp;
 
     public void syncApplication(ApplicationSyncReq applicationSyncReq){
+        log.info("Begin syncApplication...|reqObject:{}",JSONUtils.beanToJson(applicationSyncReq));
         String sourceDomain = applicationSyncReq.getSourceDomain();
         String sourceAccount = applicationSyncReq.getSourceAccount();
         String sourcePassword = applicationSyncReq.getSourcePassword();
@@ -118,7 +121,8 @@ public class SyncService {
         if (updateCount>0 || insertCount>0){
             if (updateCount>0){
                 log.info("SyncApplication success! Update application count :{},their applicationNames are {} ",updateCount,JSONUtils.beanToJson(updateApplicationNames));
-            }else {
+            }
+            if (insertCount>0){
                 log.info("SyncApplication success! Insert application count :{},their applicationNames are {}",insertCount,JSONUtils.beanToJson(insertApplicationNames));
             }
         }else {
@@ -127,6 +131,7 @@ public class SyncService {
     }
 
     public void syncDevice(DeviceSyncReq deviceSyncReq){
+        log.info("Begin syncDevice...|reqObject:{}",JSONUtils.beanToJson(deviceSyncReq));
         String sourceDomain = deviceSyncReq.getSourceDomain();
         String sourceAccount = deviceSyncReq.getSourceAccount();
         String sourcePassword = deviceSyncReq.getSourcePassword();
@@ -156,7 +161,7 @@ public class SyncService {
         ApplicationsGetResp sourceApplicationsResp = applicationServiceLoraWanHttp.get(new ApplicationsGetReq(sourceOrganizationID),sourceDomain,sourceAccount,sourcePassword);//查询源chirpStack的application数据
         ApplicationsGetResp targetApplicationsResp = applicationServiceLoraWanHttp.get(new ApplicationsGetReq(targetOrganizationID),targetDomain,targetAccount,targetPassword);//查询目标chirpStack的application数据
         Map<String,String> targetApplicationsResultMap = targetApplicationsResp.getResult().stream().collect(Collectors.toMap(ApplicationsGetResult::getName,ApplicationsGetResult::getId));
-        Map<String,String> deviceSyncApplicationMap = Maps.newHashMap();
+        Map<String,String> deviceSyncApplicationMap = Maps.newHashMap();//需要同步设备的application（key：源平台的applicationId，value：目标平台的applicationId）
         if (!deviceSyncReq.getApplicationNames().isEmpty()){
             Map<String,String> sourceApplicationsResultMap = sourceApplicationsResp.getResult().stream().collect(Collectors.toMap(ApplicationsGetResult::getName,ApplicationsGetResult::getId));
             for (String applicationName : deviceSyncReq.getApplicationNames()) {
@@ -181,6 +186,7 @@ public class SyncService {
             }
         }
         Map<String,String> sourceApplicationMap = sourceApplicationsResp.getResult().stream().collect(Collectors.toMap(ApplicationsGetResult::getId,ApplicationsGetResult::getName));
+        Set<String> changedApplication = Sets.newHashSet();//检查之后有改动device的application
         deviceSyncApplicationMap.forEach((deviceSyncSourceApplicationId,deviceSyncTargetApplicationId)->{
             String sourceApplicationName = sourceApplicationMap.get(deviceSyncSourceApplicationId);
             int updateCount = 0;
@@ -232,6 +238,7 @@ public class SyncService {
                     if (updateDevice){
                         updateCount ++;
                         updateEUIs.add(syncDeviceId);
+                        changedApplication.add(sourceApplicationName);
                     }
                 }else {
                     //目标application不存在该设备 添加
@@ -242,23 +249,29 @@ public class SyncService {
                     if (sourceDeviceKeysGetResp!=null){
                         DeviceKeys sourceDeviceKeys = sourceDeviceKeysGetResp.getDeviceKeys();
                         deviceServiceLoraWanHttp.postDeviceKey(new DeviceKeysPostReq(sourceDeviceKeys),targetDomain,targetAccount,targetPassword,true);
-                        log.info("Insert Device to target chirpStack|insertDevice:{}|insertDeviceKey:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),sourceDeviceKeys,isSuccess);
+                        log.info("Insert Device to target chirpStack|insertDevice:{}|insertDeviceKey:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),sourceDeviceKeys,true);
                     }else {
-                        log.info("Insert Device to target chirpStack|insertDevice:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),isSuccess);
+                        log.info("Insert Device to target chirpStack|insertDevice:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),true);
                     }
                     insertCount ++;
                     insertEUIs.add(targetDevice.getDevEUI());
+                    changedApplication.add(sourceApplicationName);
                 }
             }
             if (updateCount >0 || insertCount>0){
                 if (updateCount >0){
                     log.info("Sync {}'s device success! Update device count :{},their DevEUIs are {} ",sourceApplicationName,updateCount,JSONUtils.beanToJson(updateEUIs));
-                }else {
+                }
+                if (insertCount>0){
                     log.info("Sync {}'s device success! Insert device count :{},their DevEUIs are {}",sourceApplicationName,insertCount,JSONUtils.beanToJson(insertEUIs));
                 }
             }else {
                 log.info("Scan {}'s device success! No syncable device found!",sourceApplicationName);
             }
         });
+        Set<String> checkApplications = deviceSyncApplicationMap.keySet().stream().map(sourceApplicationMap::get).collect(Collectors.toSet());
+        Set<String> unCheckApplications = Sets.difference(sourceApplicationsResp.getResult().stream().map(ApplicationsGetResult::getName).collect(Collectors.toSet()),checkApplications);
+        log.info("End syncDevice! Scanned the devices in the following application on the source chirpStack and target chirpStack:{}|Devices with the following applications are not scanned on the source chirpStack:{}|After scanning, the devices with the following applications have been changed:{}",
+                JSONUtils.beanToJson(checkApplications),JSONUtils.beanToJson(unCheckApplications),JSONUtils.beanToJson(changedApplication));
     }
 }

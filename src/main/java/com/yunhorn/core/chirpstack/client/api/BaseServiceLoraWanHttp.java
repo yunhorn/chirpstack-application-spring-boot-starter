@@ -32,7 +32,6 @@ public class BaseServiceLoraWanHttp {
         try {
             return request(domain,path,account,password,headerMap,params,responseType,HttpMethod.GET);
         }catch (Exception e){
-            log.error("SendHttpsGet error",e);
             return null;
         }
     }
