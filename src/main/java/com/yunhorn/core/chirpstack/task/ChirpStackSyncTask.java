@@ -36,7 +36,8 @@ public class ChirpStackSyncTask extends ChirpStackBaseTask {
 
     public void syncApplication(){
         if (taskSwitch(GlobalHelper.TASK_NAME_SYNC_APPLICATION)){
-            syncScheduledThreadPool.schedule(()->{
+            Integer delay = getDuration(GlobalHelper.TASK_NAME_SYNC_APPLICATION);
+            syncScheduledThreadPool.scheduleWithFixedDelay(()->{
                 ApplicationSyncReq applicationSyncReq = new ApplicationSyncReq();
                 try {
                     BeanUtils.copyProperties(applicationSyncReq,userInfo);
@@ -45,13 +46,14 @@ public class ChirpStackSyncTask extends ChirpStackBaseTask {
                     return;
                 }
                 syncService.syncApplication(applicationSyncReq);
-            },getDuration(GlobalHelper.TASK_NAME_SYNC_APPLICATION),getDurationUnit(GlobalHelper.TASK_NAME_SYNC_APPLICATION));
+            },delay,delay,getDurationUnit(GlobalHelper.TASK_NAME_SYNC_APPLICATION));
         }
     }
 
     public void syncDevice(){
         if (taskSwitch(GlobalHelper.TASK_NAME_SYNC_DEVICE)){
-            syncScheduledThreadPool.schedule(()->{
+            Integer delay = getDuration(GlobalHelper.TASK_NAME_SYNC_DEVICE);
+            syncScheduledThreadPool.scheduleWithFixedDelay(()->{
                 DeviceSyncReq deviceSyncReq = new DeviceSyncReq();
                 try {
                     BeanUtils.copyProperties(deviceSyncReq,userInfo);
@@ -61,7 +63,7 @@ public class ChirpStackSyncTask extends ChirpStackBaseTask {
                 }
                 deviceSyncReq.setApplicationNames(deviceSyncConfig.getApplicationNames());
                 syncService.syncDevice(deviceSyncReq);
-            },getDuration(GlobalHelper.TASK_NAME_SYNC_DEVICE),getDurationUnit(GlobalHelper.TASK_NAME_SYNC_DEVICE));
+            },0,delay,getDurationUnit(GlobalHelper.TASK_NAME_SYNC_DEVICE));
         }
     }
 
