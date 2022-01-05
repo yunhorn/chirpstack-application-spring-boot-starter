@@ -249,13 +249,24 @@ public class SyncService {
                     if (sourceDeviceKeysGetResp!=null && isSuccess){
                         DeviceKeys sourceDeviceKeys = sourceDeviceKeysGetResp.getDeviceKeys();
                         isSuccess = deviceServiceLoraWanHttp.postDeviceKey(new DeviceKeysPostReq(sourceDeviceKeys),targetDomain,targetAccount,targetPassword,true);
-                        log.info("Insert Device to target chirpStack|insertDevice:{}|insertDeviceKey:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),sourceDeviceKeys,isSuccess);
+                        if (isSuccess){
+                            log.info("Insert Device and DeviceKey to target chirpStack success!|insertDevice:{}|insertDeviceKey:{}",JSONUtils.beanToJson(targetDevice),JSONUtils.beanToJson(sourceDeviceKeys));
+                        }else {
+                            log.error("Insert Device to target chirpStack success but insert the deviceKey error|insertDeviceKey:"+JSONUtils.beanToJson(sourceDeviceKeys),
+                                    new Exception("Insert Device to target chirpStack success but insert the deviceKey error"));
+                        }
                     }else {
-                        log.info("Insert Device to target chirpStack|insertDevice:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),isSuccess);
+                        if (isSuccess){
+                            log.info("Insert Device to target chirpStack success!|insertDevice:{}",JSONUtils.beanToJson(targetDevice));
+                        }else {
+                            log.error("Insert Device to target chirpStack error!|insertDevice:"+JSONUtils.beanToJson(targetDevice),new Exception("Insert Device to target chirpStack error"));
+                        }
                     }
-                    insertCount ++;
-                    insertEUIs.add(targetDevice.getDevEUI());
-                    changedApplication.add(sourceApplicationName);
+                    if (isSuccess){
+                        insertCount ++;
+                        insertEUIs.add(targetDevice.getDevEUI());
+                        changedApplication.add(sourceApplicationName);
+                    }
                 }
             }
             if (updateCount >0 || insertCount>0){
