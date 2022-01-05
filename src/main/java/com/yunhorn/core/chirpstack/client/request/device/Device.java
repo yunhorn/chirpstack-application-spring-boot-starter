@@ -8,6 +8,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -63,7 +64,12 @@ public class Device {
                 && thisVariables.entrySet().stream().allMatch(tagEntry-> tagEntry.getValue().equals(thatVariables.get(tagEntry.getKey())));
     }
 
-    public Device copyProperties(String applicationID,String targetDeviceProfileID){
+    @Override
+    public int hashCode() {
+        return Objects.hash(applicationID, description, devEUI, deviceProfileID, isDisabled, name, referenceAltitude, skipFCntCheck, tags, variables);
+    }
+
+    public Device copyProperties(String applicationID, String targetDeviceProfileID){
         Device device = new Device();
         try {
             BeanUtils.copyProperties(device,this);

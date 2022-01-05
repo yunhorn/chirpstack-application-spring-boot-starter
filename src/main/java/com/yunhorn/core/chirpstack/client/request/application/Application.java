@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -44,7 +45,13 @@ public class Application {
                 && !(thisApplication.getOrganizationID()!=null && thatApplication.getOrganizationID()==null)
                 && !(thisApplication.getServiceProfileID()!=null && thatApplication.getServiceProfileID()==null);
     }
-    public Application copyProperties(String targetOrganizationID,String targetServiceProfileId,boolean withId){
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(description, id, name, organizationID, payloadCodec, payloadDecoderScript, payloadEncoderScript, serviceProfileID);
+    }
+
+    public Application copyProperties(String targetOrganizationID, String targetServiceProfileId, boolean withId){
         Application targetApplication = new Application();
         try {
             BeanUtils.copyProperties(targetApplication,this);

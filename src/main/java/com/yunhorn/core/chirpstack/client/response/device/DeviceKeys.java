@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -33,6 +34,11 @@ public class DeviceKeys {
                 && Optional.ofNullable(thisDeviceKeys.getGenAppKey()).orElse("").equals(Optional.ofNullable(thatDeviceKeys.getGenAppKey()).orElse(""))
                 && Optional.ofNullable(thisDeviceKeys.getDevEUI()).orElse("").equals(Optional.ofNullable(thatDeviceKeys.getDevEUI()).orElse(""))
                 && Optional.ofNullable(thisDeviceKeys.getNwkKey()).orElse("").equals(Optional.ofNullable(thatDeviceKeys.getNwkKey()).orElse(""));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(appKey, devEUI, genAppKey, nwkKey);
     }
 
     public DeviceKeys copyProperties(){
