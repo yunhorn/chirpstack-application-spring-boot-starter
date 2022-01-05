@@ -1,12 +1,11 @@
 package com.yunhorn.core.chirpstack.task;
 
-import com.google.common.collect.Maps;
-import com.yunhorn.core.chirpstack.config.SysBaseConfig;
+import com.yunhorn.core.chirpstack.config.ApplicationSyncConfig;
+import com.yunhorn.core.chirpstack.config.DeviceSyncConfig;
 import com.yunhorn.core.chirpstack.helper.GlobalHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -17,25 +16,39 @@ import java.util.concurrent.TimeUnit;
 public class ChirpStackBaseTask {
 
     @Autowired
-    private SysBaseConfig sysBaseConfig;
+    private DeviceSyncConfig deviceSyncConfig;
+
+    @Autowired
+    private ApplicationSyncConfig applicationSyncConfig;
 
 //    private Map<String,Integer> countDownMap = Maps.newHashMap();//存倒计时的map
 
     public boolean taskSwitch(String taskName) {
-        if ("syncApplication".equals(taskName)){
-            return sysBaseConfig.isApplicationEnable();
-        }else if ("syncDevice".equals(taskName)){
-            return sysBaseConfig.isDeviceEnable();
+        if (GlobalHelper.TASK_NAME_SYNC_APPLICATION.equals(taskName)){
+            return applicationSyncConfig.isApplicationEnable();
+        }else if (GlobalHelper.TASK_NAME_SYNC_DEVICE.equals(taskName)){
+            return deviceSyncConfig.isDeviceEnable();
         }
         return false;
     }
 
-    public Integer getDuration(){
-        return sysBaseConfig.getDuration();
+    public Integer getDuration(String taskName){
+        if (GlobalHelper.TASK_NAME_SYNC_APPLICATION.equals(taskName)){
+            return applicationSyncConfig.getDuration();
+        }else if (GlobalHelper.TASK_NAME_SYNC_DEVICE.equals(taskName)){
+            return deviceSyncConfig.getDuration();
+        }
+        return 0;
     }
 
-    public TimeUnit getDurationUnit(){
-        return sysBaseConfig.getDurationUnit();
+    public TimeUnit getDurationUnit(String taskName){
+        if (GlobalHelper.TASK_NAME_SYNC_APPLICATION.equals(taskName)){
+            return applicationSyncConfig.getDurationUnit();
+        }else if (GlobalHelper.TASK_NAME_SYNC_DEVICE.equals(taskName)){
+            return deviceSyncConfig.getDurationUnit();
+        }
+        return null;
+
     }
 
 

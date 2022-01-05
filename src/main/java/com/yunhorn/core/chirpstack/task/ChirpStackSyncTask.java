@@ -4,6 +4,7 @@ import com.yunhorn.core.chirpstack.config.DeviceSyncConfig;
 import com.yunhorn.core.chirpstack.config.UserInfo;
 import com.yunhorn.core.chirpstack.dto.ApplicationSyncReq;
 import com.yunhorn.core.chirpstack.dto.DeviceSyncReq;
+import com.yunhorn.core.chirpstack.helper.GlobalHelper;
 import com.yunhorn.core.chirpstack.sync.SyncService;
 import com.yunhorn.core.chirpstack.util.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -34,36 +35,34 @@ public class ChirpStackSyncTask extends ChirpStackBaseTask {
     public static ScheduledExecutorService syncScheduledThreadPool = new ScheduledThreadPoolExecutor(1);
 
     public void syncApplication(){
-        if (!taskSwitch("syncApplication")){
-            return;
+        if (taskSwitch(GlobalHelper.TASK_NAME_SYNC_APPLICATION)){
+            syncScheduledThreadPool.schedule(()->{
+                ApplicationSyncReq applicationSyncReq = new ApplicationSyncReq();
+                try {
+                    BeanUtils.copyProperties(applicationSyncReq,userInfo);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    log.error("SyncApplication copyProperties error|{}|{}", JSONUtils.beanToJson(applicationSyncReq),JSONUtils.beanToJson(userInfo));
+                    return;
+                }
+                syncService.syncApplication(applicationSyncReq);
+            },getDuration(GlobalHelper.TASK_NAME_SYNC_APPLICATION),getDurationUnit(GlobalHelper.TASK_NAME_SYNC_APPLICATION));
         }
-        syncScheduledThreadPool.schedule(()->{
-            ApplicationSyncReq applicationSyncReq = new ApplicationSyncReq();
-            try {
-                BeanUtils.copyProperties(applicationSyncReq,userInfo);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                log.error("SyncApplication copyProperties error|{}|{}", JSONUtils.beanToJson(applicationSyncReq),JSONUtils.beanToJson(userInfo));
-                return;
-            }
-            syncService.syncApplication(applicationSyncReq);
-        },getDuration(),getDurationUnit());
     }
 
     public void syncDevice(){
-        if (!taskSwitch("syncDevice")){
-            return;
+        if (taskSwitch(GlobalHelper.TASK_NAME_SYNC_DEVICE)){
+            syncScheduledThreadPool.schedule(()->{
+                DeviceSyncReq deviceSyncReq = new DeviceSyncReq();
+                try {
+                    BeanUtils.copyProperties(deviceSyncReq,userInfo);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    log.error("SyncDevice copyProperties error|{}|{}", JSONUtils.beanToJson(deviceSyncReq),JSONUtils.beanToJson(userInfo));
+                    return;
+                }
+                deviceSyncReq.setApplicationNames(deviceSyncConfig.getApplicationNames());
+                syncService.syncDevice(deviceSyncReq);
+            },getDuration(GlobalHelper.TASK_NAME_SYNC_DEVICE),getDurationUnit(GlobalHelper.TASK_NAME_SYNC_DEVICE));
         }
-        syncScheduledThreadPool.schedule(()->{
-            DeviceSyncReq deviceSyncReq = new DeviceSyncReq();
-            try {
-                BeanUtils.copyProperties(deviceSyncReq,userInfo);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                log.error("SyncDevice copyProperties error|{}|{}", JSONUtils.beanToJson(deviceSyncReq),JSONUtils.beanToJson(userInfo));
-                return;
-            }
-            deviceSyncReq.setApplicationNames(deviceSyncConfig.getApplicationNames());
-            syncService.syncDevice(deviceSyncReq);
-        },getDuration(),getDurationUnit());
     }
 
 }

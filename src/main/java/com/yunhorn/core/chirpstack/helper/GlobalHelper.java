@@ -21,6 +21,11 @@ public class GlobalHelper {
 
     public static final String DAY = "day";
 
+    public static final String TASK_NAME_SYNC_APPLICATION = "syncApplication";
+
+    public static final String TASK_NAME_SYNC_DEVICE = "syncDevice";
+
+
     public static String getCacheKey(String prefix,String... keys){
         return getKey(prefix,CACHE_KEY_SEPARATOR,keys);
     }
