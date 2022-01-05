@@ -63,7 +63,7 @@ public class ChirpStackSyncTask extends ChirpStackBaseTask {
                 }
                 deviceSyncReq.setApplicationNames(deviceSyncConfig.getApplicationNames());
                 syncService.syncDevice(deviceSyncReq);
-            },0,delay,getDurationUnit(GlobalHelper.TASK_NAME_SYNC_DEVICE));
+            },delay,delay,getDurationUnit(GlobalHelper.TASK_NAME_SYNC_DEVICE));
         }
     }
 
