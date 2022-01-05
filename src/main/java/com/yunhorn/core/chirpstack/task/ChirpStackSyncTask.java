@@ -42,7 +42,7 @@ public class ChirpStackSyncTask extends ChirpStackBaseTask {
                 try {
                     BeanUtils.copyProperties(applicationSyncReq,userInfo);
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    log.error("SyncApplication copyProperties error|{}|{}", JSONUtils.beanToJson(applicationSyncReq),JSONUtils.beanToJson(userInfo));
+                    log.error("SyncApplication copyProperties error|dest:"+JSONUtils.beanToJson(applicationSyncReq)+"|orig:"+JSONUtils.beanToJson(userInfo),new Exception("SyncApplication copyProperties error"));
                     return;
                 }
                 syncService.syncApplication(applicationSyncReq);
@@ -58,7 +58,7 @@ public class ChirpStackSyncTask extends ChirpStackBaseTask {
                 try {
                     BeanUtils.copyProperties(deviceSyncReq,userInfo);
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    log.error("SyncDevice copyProperties error|{}|{}", JSONUtils.beanToJson(deviceSyncReq),JSONUtils.beanToJson(userInfo));
+                    log.error("SyncDevice copyProperties error|dest:"+JSONUtils.beanToJson(deviceSyncReq)+"|orig:"+JSONUtils.beanToJson(userInfo),new Exception("SyncDevice copyProperties error"));
                     return;
                 }
                 deviceSyncReq.setApplicationNames(deviceSyncConfig.getApplicationNames());
