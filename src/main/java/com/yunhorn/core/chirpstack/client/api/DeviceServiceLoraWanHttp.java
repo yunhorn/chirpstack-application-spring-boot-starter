@@ -7,7 +7,6 @@ import com.yunhorn.core.chirpstack.client.response.device.DeviceGetResp;
 import com.yunhorn.core.chirpstack.client.response.device.DeviceKeysGetResp;
 import com.yunhorn.core.chirpstack.util.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -41,55 +40,6 @@ public class DeviceServiceLoraWanHttp extends BaseServiceLoraWanHttp {
             }
         }
         return sendHttpsGet(domain,API_PATH,account,password,null,params,DeviceGetResp.class);
-    }
-
-    public static void main(String[] args) {
-        String domain = "";
-        String account = "admin";
-        String password = "admin";
-        DeviceServiceLoraWanHttp deviceServiceLoraWanHttp = new DeviceServiceLoraWanHttp();
-//        DevicePostReq devicePostReq = new DevicePostReq();
-//        Device device = new Device();
-//        device.setApplicationID("21");
-//        device.setDescription("test Device");
-//        device.setDevEUI("ffffff100000c444");
-//        device.setDeviceProfileID("b35de8ce-9dcb-4ca9-b534-98c26e1a7c47");
-//        device.setName("test Device");
-//        Map<String,String> tags = Maps.newHashMap();
-//        tags.put("aaa","aaa");
-//        device.setTags(tags);
-//        Map<String,String> variables = Maps.newHashMap();
-//        variables.put("bb","bb");
-//        device.setVariables(variables);
-//        devicePostReq.setDevice(device);
-//        boolean b = deviceServiceLoraWanHttp.post(devicePostReq,domain,account,password,true);
-//        System.out.println(b);
-//
-//        DeviceGetInfoResp deviceGetInfoResp = deviceServiceLoraWanHttp.get("ffffff100000c444",domain,account,password);
-//        System.out.println(deviceGetInfoResp);
-
-        DeviceKeysGetResp deviceKeysGetResp = deviceServiceLoraWanHttp.getDeviceKey("ffffff100001ef8b",domain,account,password);
-        System.out.println(deviceKeysGetResp);
-        DeviceKeysPostReq deviceKeysPostReq = new DeviceKeysPostReq();
-        try {
-            BeanUtils.copyProperties(deviceKeysPostReq,deviceKeysGetResp);
-        }catch (Exception e){
-            return;
-        }
-        deviceKeysPostReq.getDeviceKeys().setDevEUI("ffffff100000c444");
-        deviceServiceLoraWanHttp.postDeviceKey(deviceKeysPostReq,domain,account,password,true);
-        deviceKeysGetResp = deviceServiceLoraWanHttp.getDeviceKey("ffffff100001eed3",domain,account,password);
-        DeviceKeysPutReq deviceKeysPutReq = new DeviceKeysPutReq();
-        try {
-            BeanUtils.copyProperties(deviceKeysPutReq,deviceKeysGetResp);
-        }catch (Exception e){
-            return;
-        }
-        deviceKeysPutReq.getDeviceKeys().setDevEUI("ffffff100000c444");
-        String resp = deviceServiceLoraWanHttp.putDeviceKey(deviceKeysPutReq,domain,account,password);
-        System.out.println(resp);
-        String respDel = deviceServiceLoraWanHttp.deleteDeviceKey("ffffff100000c444",domain,account,password);
-        System.out.println(respDel);
     }
 
     /**
