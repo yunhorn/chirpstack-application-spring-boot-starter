@@ -7,10 +7,7 @@ import com.yunhorn.core.chirpstack.client.request.application.Application;
 import com.yunhorn.core.chirpstack.client.request.application.ApplicationsGetReq;
 import com.yunhorn.core.chirpstack.client.request.application.ApplicationsPostReq;
 import com.yunhorn.core.chirpstack.client.request.application.ApplicationsPutReq;
-import com.yunhorn.core.chirpstack.client.request.device.Device;
-import com.yunhorn.core.chirpstack.client.request.device.DeviceGetReq;
-import com.yunhorn.core.chirpstack.client.request.device.DevicePostReq;
-import com.yunhorn.core.chirpstack.client.request.device.DevicePutReq;
+import com.yunhorn.core.chirpstack.client.request.device.*;
 import com.yunhorn.core.chirpstack.client.request.deviceprofile.DeviceProfileGetReq;
 import com.yunhorn.core.chirpstack.client.request.organization.OrganizationGetReq;
 import com.yunhorn.core.chirpstack.client.request.serviceprofile.ServiceProfileGetReq;
@@ -18,9 +15,7 @@ import com.yunhorn.core.chirpstack.client.response.application.ApplicationsGetIn
 import com.yunhorn.core.chirpstack.client.response.application.ApplicationsGetResp;
 import com.yunhorn.core.chirpstack.client.response.application.ApplicationsGetResult;
 import com.yunhorn.core.chirpstack.client.response.application.ApplicationsPostResp;
-import com.yunhorn.core.chirpstack.client.response.device.DeviceGetInfoResp;
-import com.yunhorn.core.chirpstack.client.response.device.DeviceGetResp;
-import com.yunhorn.core.chirpstack.client.response.device.DeviceGetResult;
+import com.yunhorn.core.chirpstack.client.response.device.*;
 import com.yunhorn.core.chirpstack.client.response.deviceprofile.DeviceProfileGetResp;
 import com.yunhorn.core.chirpstack.client.response.deviceprofile.DeviceProfileGetResult;
 import com.yunhorn.core.chirpstack.client.response.organization.OrganizationGetResp;
@@ -200,21 +195,57 @@ public class SyncService {
                 DeviceGetInfoResp sourceDeviceGetInfoResp = deviceServiceLoraWanHttp.get(syncDeviceId,sourceDomain,sourceAccount,sourcePassword);
                 Device sourceDevice = sourceDeviceGetInfoResp.getDevice();
                 if (targetDeviceIdMap.contains(syncDeviceId)){
+                    boolean updateDevice = false;
                     DeviceGetInfoResp targetDeviceGetInfoResp = deviceServiceLoraWanHttp.get(syncDeviceId,targetDomain,targetAccount,targetPassword);
                     Device targetDevice = targetDeviceGetInfoResp.getDevice();
+                    //除了检查Device还需检查DeviceKey
                     if (!sourceDevice.equals(targetDevice)){
                         //源Device和目标Device的内容不一样
                         Device newTargetDevice = sourceDevice.copyProperties(deviceSyncTargetApplicationId,targetDeviceProfileId);
                         deviceServiceLoraWanHttp.put(new DevicePutReq(newTargetDevice),targetDomain,targetAccount,targetPassword);
                         log.info("Update target chirpStack Application's Device|Before update:{}|After update:{}", JSONUtils.beanToJson(targetDevice),JSONUtils.beanToJson(newTargetDevice));
+                        updateDevice = true;
+                    }
+                    DeviceKeysGetResp sourceDeviceKeysGetResp = deviceServiceLoraWanHttp.getDeviceKey(sourceDevice.getDevEUI(),sourceDomain,sourceAccount,sourcePassword);
+                    DeviceKeysGetResp targetDeviceKeysGetResp = deviceServiceLoraWanHttp.getDeviceKey(targetDevice.getDevEUI(),targetDomain,targetAccount,targetPassword);
+                    if (sourceDeviceKeysGetResp==null && targetDeviceKeysGetResp!=null){
+                        //如果源Device不存在Key但是目标Device存在Key，则把目标Device的Key删除
+                        deviceServiceLoraWanHttp.deleteDeviceKey(targetDevice.getDevEUI(),targetDomain,targetAccount,targetPassword);
+                        updateDevice = true;
+                        log.info("Delete target chirpStack Application's Device'Key|Before delete:{}",JSONUtils.beanToJson(targetDeviceKeysGetResp.getDeviceKeys()));
+                    }else if (sourceDeviceKeysGetResp!=null && targetDeviceKeysGetResp==null){
+                        //如果源Device存在key但是目标Device不存在，则将源Device的key添加到目标Device的key
+                        deviceServiceLoraWanHttp.postDeviceKey(new DeviceKeysPostReq(sourceDeviceKeysGetResp.getDeviceKeys()),targetDomain,targetAccount,targetPassword,true);
+                        updateDevice = true;
+                        log.info("Insert target chirpStack Application's Device'Key|insertObj:{}",JSONUtils.beanToJson(sourceDeviceKeysGetResp.getDeviceKeys()));
+                    }else if (sourceDeviceKeysGetResp != null){
+                        //如果源Device和目标Device都存在key，则对比两者的key是否内容相同，如果不同则将源DeviceKey的内容更新到目标DeviceKey
+                        DeviceKeys sourceDeviceKeys = sourceDeviceKeysGetResp.getDeviceKeys();
+                        DeviceKeys targetDeviceKeys = targetDeviceKeysGetResp.getDeviceKeys();
+                        if (!sourceDeviceKeys.equals(targetDeviceKeys)){
+                            DeviceKeys newTargetDeviceKeys = sourceDeviceKeys.copyProperties();
+                            deviceServiceLoraWanHttp.putDeviceKey(new DeviceKeysPutReq(newTargetDeviceKeys),targetDomain,targetAccount,targetPassword);
+                            updateDevice = true;
+                            log.info("Update target chirpStack Application's Device'Key|Before update:{}|After update:{}",JSONUtils.beanToJson(targetDeviceKeys),JSONUtils.beanToJson(newTargetDeviceKeys));
+                        }
+                    }
+                    if (updateDevice){
                         updateCount ++;
-                        updateEUIs.add(newTargetDevice.getDevEUI());
+                        updateEUIs.add(syncDeviceId);
                     }
                 }else {
                     //目标application不存在该设备 添加
                     Device targetDevice = sourceDevice.copyProperties(deviceSyncTargetApplicationId,targetDeviceProfileId);
                     boolean isSuccess = deviceServiceLoraWanHttp.post(new DevicePostReq(targetDevice),targetDomain,targetAccount,targetPassword,true);
-                    log.info("Insert Device to target chirpStack|insertObj:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),isSuccess);
+                    //如果源device有key，则将其添加到目标device的key
+                    DeviceKeysGetResp sourceDeviceKeysGetResp = deviceServiceLoraWanHttp.getDeviceKey(sourceDevice.getDevEUI(),sourceDomain,sourceAccount,sourcePassword);
+                    if (sourceDeviceKeysGetResp!=null){
+                        DeviceKeys sourceDeviceKeys = sourceDeviceKeysGetResp.getDeviceKeys();
+                        deviceServiceLoraWanHttp.postDeviceKey(new DeviceKeysPostReq(sourceDeviceKeys),targetDomain,targetAccount,targetPassword,true);
+                        log.info("Insert Device to target chirpStack|insertDevice:{}|insertDeviceKey:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),sourceDeviceKeys,isSuccess);
+                    }else {
+                        log.info("Insert Device to target chirpStack|insertDevice:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),isSuccess);
+                    }
                     insertCount ++;
                     insertEUIs.add(targetDevice.getDevEUI());
                 }

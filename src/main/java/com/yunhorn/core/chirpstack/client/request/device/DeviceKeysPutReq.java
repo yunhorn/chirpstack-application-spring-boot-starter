@@ -10,4 +10,10 @@ import lombok.Data;
 @Data
 public class DeviceKeysPutReq {
     private DeviceKeys deviceKeys;
+    public DeviceKeysPutReq(){
+
+    }
+    public DeviceKeysPutReq(DeviceKeys deviceKeys){
+        this.deviceKeys = deviceKeys;
+    }
 }
