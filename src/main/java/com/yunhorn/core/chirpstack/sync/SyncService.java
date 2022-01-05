@@ -246,12 +246,12 @@ public class SyncService {
                     boolean isSuccess = deviceServiceLoraWanHttp.post(new DevicePostReq(targetDevice),targetDomain,targetAccount,targetPassword,true);
                     //如果源device有key，则将其添加到目标device的key
                     DeviceKeysGetResp sourceDeviceKeysGetResp = deviceServiceLoraWanHttp.getDeviceKey(sourceDevice.getDevEUI(),sourceDomain,sourceAccount,sourcePassword);
-                    if (sourceDeviceKeysGetResp!=null){
+                    if (sourceDeviceKeysGetResp!=null && isSuccess){
                         DeviceKeys sourceDeviceKeys = sourceDeviceKeysGetResp.getDeviceKeys();
-                        deviceServiceLoraWanHttp.postDeviceKey(new DeviceKeysPostReq(sourceDeviceKeys),targetDomain,targetAccount,targetPassword,true);
-                        log.info("Insert Device to target chirpStack|insertDevice:{}|insertDeviceKey:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),sourceDeviceKeys,true);
+                        isSuccess = deviceServiceLoraWanHttp.postDeviceKey(new DeviceKeysPostReq(sourceDeviceKeys),targetDomain,targetAccount,targetPassword,true);
+                        log.info("Insert Device to target chirpStack|insertDevice:{}|insertDeviceKey:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),sourceDeviceKeys,isSuccess);
                     }else {
-                        log.info("Insert Device to target chirpStack|insertDevice:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),true);
+                        log.info("Insert Device to target chirpStack|insertDevice:{}|isSuccess:{}",JSONUtils.beanToJson(targetDevice),isSuccess);
                     }
                     insertCount ++;
                     insertEUIs.add(targetDevice.getDevEUI());
