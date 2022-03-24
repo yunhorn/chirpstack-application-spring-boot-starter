@@ -29,36 +29,40 @@ public class BaseServiceLoraWanHttp {
     private Map<String,String> tokenMap = Maps.newHashMap();
 
     protected <T> T sendHttpsGet(String domain,String path,String account,String password, Map<String,String> headerMap,Map<String, String> params,Class<T> responseType){
-        try {
-            return request(domain,path,account,password,headerMap,params,responseType,HttpMethod.GET);
-        }catch (Exception e){
-            return null;
-        }
+        return request(domain,path,account,password,headerMap,params,responseType,HttpMethod.GET);
     }
 
     private <T> T request(String domain, String path,String account,String password, Map<String,String> headerMap, Object reqBody,Class<T> responseType,HttpMethod httpMethod){
-        if (headerMap==null){
-            headerMap = Maps.newHashMap();
-        }
-        if (StringUtils.isBlank(account) || StringUtils.isBlank(password)){
-            //用户名或者密码为空时 则默认根据domain从配置文件里找到对应的账号密码
-            CurrentOperator currentOperator = getCurrentOperator(domain);
-            if (currentOperator==null){
-                return null;
+        try {
+            if (headerMap==null){
+                headerMap = Maps.newHashMap();
             }
-            account = currentOperator.getAccount();
-            password = currentOperator.getPassword();
+            if (StringUtils.isBlank(account) || StringUtils.isBlank(password)){
+                //用户名或者密码为空时 则默认根据domain从配置文件里找到对应的账号密码
+                CurrentOperator currentOperator = getCurrentOperator(domain);
+                if (currentOperator==null){
+                    return null;
+                }
+                account = currentOperator.getAccount();
+                password = currentOperator.getPassword();
+            }
+            if (domain.endsWith("/")){
+                //若传进来的domain以“/”结尾 则需去掉
+                domain = domain.substring(0,domain.length()-1);
+            }
+            if (!domain.startsWith("http://")){
+                domain = "http://" + domain;
+            }
+            checkHeaderMap(domain, account,password, headerMap);
+            String result = request(domain, path, headerMap, reqBody, httpMethod);
+            if (checkIsAuthenticationFailed(result)){
+                result = retryRequest(domain,path,account,password,headerMap,reqBody,httpMethod);
+            }
+            return (T) JSONUtils.jsonToBean(result,responseType);
+        }catch (Exception e){
+            log.error("The request encountered some errors",e);
+            return null;
         }
-        if (domain.endsWith("/")){
-            //若传进来的domain以“/”结尾 则需去掉
-            domain = domain.substring(0,domain.length()-1);
-        }
-        checkHeaderMap(domain, account,password, headerMap);
-        String result = request(domain, path, headerMap, reqBody, httpMethod);
-        if (checkIsAuthenticationFailed(result)){
-            result = retryRequest(domain,path,account,password,headerMap,reqBody,httpMethod);
-        }
-        return (T) JSONUtils.jsonToBean(result,responseType);
     }
 
     private String request(String domain, String path, Map<String,String> headerMap, Object reqBody, HttpMethod httpMethod){
