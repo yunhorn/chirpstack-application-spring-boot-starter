@@ -1,6 +1,7 @@
 package com.yunhorn.core.chirpstack.client.api;
 
 import com.google.common.collect.Maps;
+import com.yunhorn.core.chirpstack.client.response.BaseGetResp;
 import com.yunhorn.core.chirpstack.dto.CurrentOperator;
 import com.yunhorn.core.chirpstack.helper.GlobalHelper;
 import com.yunhorn.core.chirpstack.util.JSONUtils;
@@ -27,6 +28,25 @@ public class BaseServiceLoraWanHttp {
     private UserInfo userInfo;
 
     private Map<String,String> tokenMap = Maps.newHashMap();
+
+    protected <T> T sendHttpsGet(Object reqObject,String domain,String path, String account, String password,Class<T> responseType){
+        Map<String, String> params = Maps.newHashMap();
+        if (reqObject!=null){
+            String objectJson = JSONUtils.beanToJson(reqObject);
+            Map<String,String> reqMap = JSONUtils.jsonToStrMap(objectJson);
+            if (reqMap==null){
+                return null;
+            }else {
+                params.putAll(reqMap);
+            }
+            if (params.get("limit")==null && params.get("offset")==null){
+                BaseGetResp baseGetResp = (BaseGetResp) sendHttpsGet(domain,path,account,password,null,params,responseType);
+                String totalCount = baseGetResp.getTotalCount();
+                params.put("limit",totalCount);
+            }
+        }
+        return sendHttpsGet(domain,path,account,password,null,params,responseType);
+    }
 
     protected <T> T sendHttpsGet(String domain,String path,String account,String password, Map<String,String> headerMap,Map<String, String> params,Class<T> responseType){
         return request(domain,path,account,password,headerMap,params,responseType,HttpMethod.GET);

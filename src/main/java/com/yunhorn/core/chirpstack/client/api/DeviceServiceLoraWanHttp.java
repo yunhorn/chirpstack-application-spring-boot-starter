@@ -10,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-
 /**
  * @author ljm
  * @date 2021/2/24 17:23
@@ -26,20 +24,7 @@ public class DeviceServiceLoraWanHttp extends BaseServiceLoraWanHttp {
      * GET /api/devices
      */
     public DeviceGetResp get(DeviceGetReq deviceGetReq, String domain, String account, String password){
-        Map<String, String> params = Maps.newHashMap();
-        if (deviceGetReq!=null){
-            String deviceGetReqJson = JSONUtils.beanToJson(deviceGetReq);
-            params = JSONUtils.jsonToStrMap(deviceGetReqJson);
-            if (params==null){
-                return null;
-            }
-            if (StringUtils.isBlank(deviceGetReq.getLimit()) && StringUtils.isBlank(deviceGetReq.getOffset())){
-                DeviceGetResp deviceGetResp = sendHttpsGet(domain,API_PATH,account,password,null,params,DeviceGetResp.class);
-                String totalCount = deviceGetResp.getTotalCount();
-                params.put("limit",totalCount);
-            }
-        }
-        return sendHttpsGet(domain,API_PATH,account,password,null,params,DeviceGetResp.class);
+        return sendHttpsGet(deviceGetReq,domain,API_PATH,account,password,DeviceGetResp.class);
     }
 
     /**

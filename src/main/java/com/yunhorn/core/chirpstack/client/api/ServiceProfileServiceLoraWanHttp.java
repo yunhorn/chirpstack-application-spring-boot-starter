@@ -23,24 +23,7 @@ public class ServiceProfileServiceLoraWanHttp extends BaseServiceLoraWanHttp {
      * GET /api/service-profiles
      */
     public ServiceProfileGetResp get(ServiceProfileGetReq serviceProfileGetReq, String domain, String account, String password){
-        Map<String, String> params = Maps.newHashMap();
-        if (serviceProfileGetReq!=null){
-            if (StringUtils.isNotBlank(serviceProfileGetReq.getLimit())){
-                params.put("limit",serviceProfileGetReq.getLimit());
-            }
-            if (StringUtils.isNotBlank(serviceProfileGetReq.getOffset())){
-                params.put("offset",serviceProfileGetReq.getOffset());
-            }
-            if (StringUtils.isNotBlank(serviceProfileGetReq.getOrganizationID())){
-                params.put("organizationID",serviceProfileGetReq.getOrganizationID());
-            }
-            if (StringUtils.isBlank(serviceProfileGetReq.getLimit()) && StringUtils.isBlank(serviceProfileGetReq.getOffset())){
-                ServiceProfileGetResp serviceProfileGetResp = sendHttpsGet(domain,API_PATH,account,password,null,params,ServiceProfileGetResp.class);
-                String totalCount = serviceProfileGetResp.getTotalCount();
-                params.put("limit",totalCount);
-            }
-        }
-        return sendHttpsGet(domain,API_PATH,account,password,null,params,ServiceProfileGetResp.class);
+        return sendHttpsGet(serviceProfileGetReq,domain,API_PATH,account,password,ServiceProfileGetResp.class);
     }
 
 //    POST /api/service-profiles

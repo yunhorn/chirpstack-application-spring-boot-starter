@@ -1,5 +1,6 @@
 package com.yunhorn.core.chirpstack.client.response.application;
 
+import com.yunhorn.core.chirpstack.client.response.BaseGetResp;
 import lombok.Data;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
  * @date 2021/2/24 14:20
  */
 @Data
-public class ApplicationsGetResp {
+public class ApplicationsGetResp extends BaseGetResp {
 //    {
 //        "result": [
 //        {
@@ -24,5 +25,4 @@ public class ApplicationsGetResp {
 //        "totalCount": "string"
 //    }
     private List<ApplicationsGetResult> result;
-    private String totalCount;
 }

@@ -22,25 +22,7 @@ public class OrganizationServiceLoraWanHttp extends BaseServiceLoraWanHttp {
      * GET /api/organizations
      */
     public OrganizationGetResp get(OrganizationGetReq organizationGetReq, String domain, String account, String password) {
-        Map<String, String> params = Maps.newHashMap();
-        if (organizationGetReq != null) {
-            if (StringUtils.isNotBlank(organizationGetReq.getLimit())) {
-                params.put("limit", organizationGetReq.getLimit());
-            }
-            if (StringUtils.isNotBlank(organizationGetReq.getOffset())) {
-                params.put("offset", organizationGetReq.getOffset());
-            }
-            if (StringUtils.isNotBlank(organizationGetReq.getSearch())) {
-                params.put("search", organizationGetReq.getSearch());
-            }
-            if (StringUtils.isBlank(organizationGetReq.getLimit()) && StringUtils.isBlank(organizationGetReq.getOffset())) {
-                OrganizationGetResp organizationGetResp = sendHttpsGet(domain, API_PATH, account, password, null, params, OrganizationGetResp.class);
-                String totalCount = organizationGetResp.getTotalCount();
-                params.put("limit", totalCount);
-            }
-
-        }
-        return sendHttpsGet(domain, API_PATH, account, password, null, params, OrganizationGetResp.class);
+        return sendHttpsGet(organizationGetReq,domain,API_PATH,account,password,OrganizationGetResp.class);
     }
 
 //    POST /api/organizations

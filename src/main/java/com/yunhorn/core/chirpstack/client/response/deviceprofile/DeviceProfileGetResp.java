@@ -1,5 +1,6 @@
 package com.yunhorn.core.chirpstack.client.response.deviceprofile;
 
+import com.yunhorn.core.chirpstack.client.response.BaseGetResp;
 import lombok.Data;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
  * @date 2021/2/24 16:21
  */
 @Data
-public class DeviceProfileGetResp {
+public class DeviceProfileGetResp extends BaseGetResp {
 //    {
 //        "result": [
 //        {
@@ -24,5 +25,4 @@ public class DeviceProfileGetResp {
 //        "totalCount": "string"
 //    }
     private List<DeviceProfileGetResult> result;
-    private String totalCount;
 }

@@ -47,6 +47,7 @@ public class Gateway {
     private String name;
     private String networkServerID;
     private String organizationID;
+    private String serviceProfileID;
 //    tags
 
 }

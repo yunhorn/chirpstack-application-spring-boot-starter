@@ -1,12 +1,12 @@
-//package io.github.yunhorn.chirpstackappsyncer.client.api;
+//package com.yunhorn.core.chirpstack.client.api;
 //
 //import com.google.common.collect.Maps;
-//import com.smartoilets.api.service.lorawan.request.gateway.Gateway;
-//import com.smartoilets.api.service.lorawan.request.gateway.GatewayGetReq;
-//import com.smartoilets.api.service.lorawan.request.gateway.GatewayPostReq;
-//import com.smartoilets.api.service.lorawan.response.gateway.GatewayGetInfoResp;
-//import com.smartoilets.api.service.lorawan.response.gateway.GatewayGetResp;
-//import com.smartoilets.common.util.JSONUtils;
+//import com.yunhorn.core.chirpstack.client.request.gateway.Gateway;
+//import com.yunhorn.core.chirpstack.client.request.gateway.GatewayGetReq;
+//import com.yunhorn.core.chirpstack.client.request.gateway.GatewayPostReq;
+//import com.yunhorn.core.chirpstack.client.response.gateway.GatewayGetInfoResp;
+//import com.yunhorn.core.chirpstack.client.response.gateway.GatewayGetResp;
+//import com.yunhorn.core.chirpstack.util.JSONUtils;
 //import lombok.extern.slf4j.Slf4j;
 //import org.springframework.stereotype.Service;
 //
@@ -19,15 +19,16 @@
 //@Service
 //@Slf4j
 //public class GatewayServiceLoraWanHttp extends BaseServiceLoraWanHttp {
-////    GET /api/gateways
+//    private final String API_PATH = "/api/gateways";
+//
+//    /**
+//     * GET /api/gateways
+//     */
 //    public GatewayGetResp get(GatewayGetReq gatewayGetReq, String domain, String account, String password){
 //        Map<String, String> params = Maps.newHashMap();
 //        if (gatewayGetReq!=null){
-//            String gatewayGetReqJson = JSONUtils.beanToJson(gatewayGetReq);
-//            params = JSONUtils.jsonToStrMap(gatewayGetReqJson);
+//
 //        }
-//        Map<String, String> headerMap = getAuthHeadMap(domain,account,password,false);
-//        String resp = sendHttpsGet(domain,"/api/gateways",headerMap,params);
 //        GatewayGetResp gatewayGetResp = new GatewayGetResp();
 //        try {
 //            gatewayGetResp = (GatewayGetResp) JSONUtils.jsonToBean(resp,GatewayGetResp.class);
@@ -60,7 +61,7 @@
 //        return true;
 //    }
 //
-//    public GatewayGetInfoResp get(String id,String domain,String account,String password){
+//    public GatewayGetInfoResp get(String id, String domain, String account, String password){
 //        Map<String, String> params = Maps.newHashMap();
 //        params.put("id",id);
 //        Map<String, String> headerMap = getAuthHeadMap(domain,account,password,false);
