@@ -47,8 +47,11 @@ public class GatewayServiceLoraWanHttp extends BaseServiceLoraWanHttp {
      * PUT /api/gateways/{gateway.id}
      */
     public boolean put(String domain, String account, String password, GatewayPutReq gatewayPutReq){
+        if (gatewayPutReq.getGateway()==null || gatewayPutReq.getGateway().getId()==null){
+            return false;
+        }
         try {
-            String resp = sendHttpsPut(domain,API_PATH,account,password,null,gatewayPutReq,String.class);
+            String resp = sendHttpsPut(domain,API_PATH+"/"+gatewayPutReq.getGateway().getId(),account,password,null,gatewayPutReq,String.class);
             if (resp.contains("error")){
                 log.error("Update gateway error,reqObj:{}|respMsg:{}",JSONUtils.beanToJson(gatewayPutReq),resp);
                 return false;
