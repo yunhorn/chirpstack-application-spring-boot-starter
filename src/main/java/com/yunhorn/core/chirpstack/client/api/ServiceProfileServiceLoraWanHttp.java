@@ -1,10 +1,13 @@
 package com.yunhorn.core.chirpstack.client.api;
 
-import com.google.common.collect.Maps;
 import com.yunhorn.core.chirpstack.client.request.serviceprofile.ServiceProfileGetReq;
+import com.yunhorn.core.chirpstack.client.request.serviceprofile.ServiceProfilePostReq;
+import com.yunhorn.core.chirpstack.client.request.serviceprofile.ServiceProfilePutReq;
+import com.yunhorn.core.chirpstack.client.response.serviceprofile.ServiceProfileGetInfoResp;
 import com.yunhorn.core.chirpstack.client.response.serviceprofile.ServiceProfileGetResp;
+import com.yunhorn.core.chirpstack.client.response.serviceprofile.ServiceProfilePostResp;
+import com.yunhorn.core.chirpstack.util.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -26,45 +29,38 @@ public class ServiceProfileServiceLoraWanHttp extends BaseServiceLoraWanHttp {
         return sendHttpsGet(serviceProfileGetReq,domain,API_PATH,account,password,ServiceProfileGetResp.class);
     }
 
-//    POST /api/service-profiles
-//    public ServiceProfilePostResp post(String domain, String account, String password, ServiceProfilePostReq serviceProfilePostReq){
-//        ServiceProfilePostResp serviceProfilePostResp = new ServiceProfilePostResp();
-//        Map<String,Map> reqMap = Maps.newHashMap();
-//        if (serviceProfilePostReq!=null && serviceProfilePostReq.getServiceProfile()!=null){
-//            ServiceProfile serviceProfileReq = serviceProfilePostReq.getServiceProfile();
-//            String serviceProfileJson = JSONUtils.beanToJson(serviceProfileReq);
-//            Map<String, Object> serviceProfile = JSONUtils.jsonToMap(serviceProfileJson);
-//            reqMap.put("serviceProfile",serviceProfile);
-//        }else {
-//            return serviceProfilePostResp;
-//        }
-//        Map<String,String> headerMap = getAuthHeadMap(domain,account,password,false);
-//        String resp = sendHttpsPost(domain,"/api/service-profiles",headerMap,reqMap);
-//        Map<String,Object> respMap = JSONUtils.jsonToMap(resp);
-//        if (respMap!=null && respMap.containsKey("error")){
-//            String errorMsg = (String) respMap.get("error");
-//            log.error("ServiceProfile post error:{}",errorMsg);
-//            return serviceProfilePostResp;
-//        }
-//        try {
-//            serviceProfilePostResp = (ServiceProfilePostResp) JSONUtils.jsonToBean(resp,ServiceProfilePostResp.class);
-//        }catch (Exception e){
-//            log.error("jsonToBean ServiceProfilePostResp error",e);
-//        }
-//        return serviceProfilePostResp;
-//    }
-//
-//    public ServiceProfileGetInfoResp get(String id,String domain,String account,String password){
-//        ServiceProfileGetInfoResp serviceProfileGetInfoResp = new ServiceProfileGetInfoResp();
-//        Map<String, String> params = Maps.newHashMap();
-//        params.put("id",id);
-//        Map<String, String> headerMap = getAuthHeadMap(domain,account,password,false);
-//        String resp = sendHttpsGet(domain,"/api/service-profiles/"+id,headerMap,params);
-//        try {
-//            serviceProfileGetInfoResp = (ServiceProfileGetInfoResp) JSONUtils.jsonToBean(resp,ServiceProfileGetInfoResp.class);
-//        }catch (Exception e){
-//            log.error("jsonToBean ServiceProfileGetInfoResp error",e);
-//        }
-//        return serviceProfileGetInfoResp;
-//    }
+    /**
+     * POST /api/service-profiles
+     */
+    public ServiceProfilePostResp post(String domain, String account, String password, ServiceProfilePostReq serviceProfilePostReq){
+        return sendHttpsPost(domain,API_PATH,account,password,null,serviceProfilePostReq,ServiceProfilePostResp.class);
+    }
+
+    /**
+     * PUT /api/service-profiles/{service_profile.id}
+     */
+    public boolean put(ServiceProfilePutReq serviceProfilePutReq,String domain, String account, String password){
+        if (serviceProfilePutReq==null || serviceProfilePutReq.getServiceProfile().getId()==null){
+            return false;
+        }
+        try {
+            String resp = sendHttpsPut(domain,API_PATH+"/"+serviceProfilePutReq.getServiceProfile().getId(),account,password,null,serviceProfilePutReq,String.class);
+            if (resp.contains("error")){
+                log.error("Update service-profiles error,reqObj:{}|respMsg:{}", JSONUtils.beanToJson(serviceProfilePutReq),resp);
+                return false;
+            }
+            log.info("Update service-profiles success,reqObj:{}|respMsg:{}",JSONUtils.beanToJson(serviceProfilePutReq),resp);
+        }catch (Exception e){
+            log.error("Update service-profiles error,reqObj:"+JSONUtils.beanToJson(serviceProfilePutReq),e);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * GET /api/service-profiles/{id}
+     */
+    public ServiceProfileGetInfoResp get(String id, String domain, String account, String password){
+        return sendHttpsGet(domain,API_PATH+"/"+id,account,password,null,null,ServiceProfileGetInfoResp.class);
+    }
 }
