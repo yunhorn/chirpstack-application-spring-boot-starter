@@ -9,4 +9,6 @@ import lombok.Data;
 @Data
 public class GatewayPostReq {
     private Gateway gateway;
+    public GatewayPostReq(){}
+    public GatewayPostReq(Gateway gateway){this.gateway = gateway;}
 }

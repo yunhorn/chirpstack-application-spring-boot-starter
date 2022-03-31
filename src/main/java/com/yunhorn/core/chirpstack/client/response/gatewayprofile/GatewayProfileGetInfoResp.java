@@ -1,5 +1,6 @@
 package com.yunhorn.core.chirpstack.client.response.gatewayprofile;
 
+import com.yunhorn.core.chirpstack.client.request.gatewayprofile.GatewayProfile;
 import lombok.Data;
 
 /**
@@ -9,6 +10,6 @@ import lombok.Data;
 @Data
 public class GatewayProfileGetInfoResp {
     private String createdAt;
-    private GatewayProfileResp gatewayProfile;
+    private GatewayProfile gatewayProfile;
     private String updatedAt;
 }

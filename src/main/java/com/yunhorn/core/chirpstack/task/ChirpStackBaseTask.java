@@ -2,6 +2,7 @@ package com.yunhorn.core.chirpstack.task;
 
 import com.yunhorn.core.chirpstack.config.ApplicationSyncConfig;
 import com.yunhorn.core.chirpstack.config.DeviceSyncConfig;
+import com.yunhorn.core.chirpstack.config.GatewaySyncConfig;
 import com.yunhorn.core.chirpstack.helper.GlobalHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,9 @@ public class ChirpStackBaseTask {
     @Autowired
     private ApplicationSyncConfig applicationSyncConfig;
 
+    @Autowired
+    private GatewaySyncConfig gatewaySyncConfig;
+
 //    private Map<String,Integer> countDownMap = Maps.newHashMap();//存倒计时的map
 
     public boolean taskSwitch(String taskName) {
@@ -28,6 +32,8 @@ public class ChirpStackBaseTask {
             return applicationSyncConfig.isApplicationEnable();
         }else if (GlobalHelper.TASK_NAME_SYNC_DEVICE.equals(taskName)){
             return deviceSyncConfig.isDeviceEnable();
+        }else if (GlobalHelper.TASK_NAME_SYNC_GATEWAY.equals(taskName)){
+            return gatewaySyncConfig.isGatewayEnable();
         }
         return false;
     }
@@ -37,6 +43,8 @@ public class ChirpStackBaseTask {
             return applicationSyncConfig.getDuration();
         }else if (GlobalHelper.TASK_NAME_SYNC_DEVICE.equals(taskName)){
             return deviceSyncConfig.getDuration();
+        }else if (GlobalHelper.TASK_NAME_SYNC_GATEWAY.equals(taskName)){
+            return gatewaySyncConfig.getDuration();
         }
         return 0;
     }
@@ -46,6 +54,8 @@ public class ChirpStackBaseTask {
             return applicationSyncConfig.getDurationUnit();
         }else if (GlobalHelper.TASK_NAME_SYNC_DEVICE.equals(taskName)){
             return deviceSyncConfig.getDurationUnit();
+        }else if (GlobalHelper.TASK_NAME_SYNC_GATEWAY.equals(taskName)){
+            return gatewaySyncConfig.getDurationUnit();
         }
         return null;
 

@@ -4,6 +4,7 @@ import com.yunhorn.core.chirpstack.config.DeviceSyncConfig;
 import com.yunhorn.core.chirpstack.config.UserInfo;
 import com.yunhorn.core.chirpstack.dto.ApplicationSyncReq;
 import com.yunhorn.core.chirpstack.dto.DeviceSyncReq;
+import com.yunhorn.core.chirpstack.dto.GatewaySyncReq;
 import com.yunhorn.core.chirpstack.helper.GlobalHelper;
 import com.yunhorn.core.chirpstack.helper.ThreadPoolHelper;
 import com.yunhorn.core.chirpstack.sync.SyncService;
@@ -62,6 +63,22 @@ public class ChirpStackSyncTask extends ChirpStackBaseTask {
                 deviceSyncReq.setApplicationNames(deviceSyncConfig.getApplicationNames());
                 syncService.syncDevice(deviceSyncReq);
             },delay,delay,getDurationUnit(GlobalHelper.TASK_NAME_SYNC_DEVICE));
+        }
+    }
+
+    public void syncGateway(){
+        if (taskSwitch(GlobalHelper.TASK_NAME_SYNC_GATEWAY)){
+            Integer delay = getDuration(GlobalHelper.TASK_NAME_SYNC_GATEWAY);
+            ThreadPoolHelper.syncScheduledThreadPool.scheduleWithFixedDelay(()->{
+                GatewaySyncReq gatewaySyncReq = new GatewaySyncReq();
+                try {
+                    BeanUtils.copyProperties(gatewaySyncReq,userInfo);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    log.error("SyncGateway copyProperties error|dest:"+JSONUtils.beanToJson(gatewaySyncReq)+"|orig:"+JSONUtils.beanToJson(userInfo),new Exception("SyncDevice copyProperties error"));
+                    return;
+                }
+                syncService.syncGateway(gatewaySyncReq);
+            },delay,delay,getDurationUnit(GlobalHelper.TASK_NAME_SYNC_GATEWAY));
         }
     }
 

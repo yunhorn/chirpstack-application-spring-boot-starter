@@ -9,4 +9,8 @@ import lombok.Data;
 @Data
 public class ServiceProfilePostReq {
     private ServiceProfile serviceProfile;
+    public ServiceProfilePostReq(){}
+    public ServiceProfilePostReq(ServiceProfile serviceProfile){
+        this.serviceProfile = serviceProfile;
+    }
 }

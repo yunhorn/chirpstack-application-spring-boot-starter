@@ -9,4 +9,7 @@ import lombok.Data;
 @Data
 public class GatewayProfilePutReq {
     private GatewayProfile gatewayProfile;
+    public GatewayProfilePutReq(){}
+    public GatewayProfilePutReq(GatewayProfile gatewayProfile){this.gatewayProfile = gatewayProfile;}
+
 }

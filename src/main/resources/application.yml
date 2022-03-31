@@ -23,4 +23,8 @@ chirpStack:
         durationUnit:
         applicationName:
         removeTargetRedundantDevice: false
+      gateway:
+        enable: false
+        duration: 0
+        durationUnit:
 

@@ -28,5 +28,10 @@ public class GatewayGetReq {
     private String offset;
     private String organizationID;
     private String search;
+    public GatewayGetReq(){
 
+    }
+    public GatewayGetReq(String organizationID){
+        this.organizationID = organizationID;
+    }
 }

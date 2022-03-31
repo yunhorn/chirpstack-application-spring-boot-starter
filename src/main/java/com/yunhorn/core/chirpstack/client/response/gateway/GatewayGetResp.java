@@ -1,5 +1,6 @@
 package com.yunhorn.core.chirpstack.client.response.gateway;
 
+import com.yunhorn.core.chirpstack.client.response.BaseGetResp;
 import lombok.Data;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
  * @date 2021/2/25 11:41
  */
 @Data
-public class GatewayGetResp {
+public class GatewayGetResp extends BaseGetResp {
 //    {
 //        "result": [
 //        {
@@ -34,5 +35,4 @@ public class GatewayGetResp {
 //        "totalCount": "string"
 //    }
     private List<GatewayGetResult> result;
-    private String totalCount;
 }

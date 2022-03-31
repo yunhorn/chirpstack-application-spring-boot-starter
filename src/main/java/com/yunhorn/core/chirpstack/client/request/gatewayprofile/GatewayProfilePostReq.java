@@ -31,4 +31,6 @@ public class GatewayProfilePostReq {
 //    }
 //    }
     private GatewayProfile gatewayProfile;
+    public GatewayProfilePostReq(){}
+    public GatewayProfilePostReq(GatewayProfile gatewayProfile){this.gatewayProfile = gatewayProfile;}
 }

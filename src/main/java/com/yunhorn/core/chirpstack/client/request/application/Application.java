@@ -37,8 +37,9 @@ public class Application {
         }
         Application thisApplication = this;
         Application thatApplication = (Application)o;
-        //id name organizationID 不用比较 ，serviceProfileID因为可能serviceProfileName不一样 不比较 之对比Application里的内容
+        //id organizationID 不用比较 ，serviceProfileID因为可能serviceProfileName不一样 不比较 只对比Application里的内容
         return Optional.ofNullable(thisApplication.getDescription()).orElse("").equals(Optional.ofNullable(thatApplication.getDescription()).orElse(""))
+                && Optional.ofNullable(thisApplication.getName()).orElse("").equals(Optional.ofNullable(thatApplication.getName()).orElse(""))
                 && Optional.ofNullable(thisApplication.getPayloadCodec()).orElse("").equals(Optional.ofNullable(thatApplication.getPayloadCodec()).orElse(""))
                 && Optional.ofNullable(thisApplication.getPayloadDecoderScript()).orElse("").equals(Optional.ofNullable(thatApplication.getPayloadDecoderScript()).orElse(""))
                 && Optional.ofNullable(thisApplication.getPayloadEncoderScript()).orElse("").equals(Optional.ofNullable(thatApplication.getPayloadEncoderScript()).orElse(""))
@@ -48,19 +49,17 @@ public class Application {
 
     @Override
     public int hashCode() {
-        return Objects.hash(description, id, name, organizationID, payloadCodec, payloadDecoderScript, payloadEncoderScript, serviceProfileID);
+        return Objects.hash(description, name, payloadCodec, payloadDecoderScript, payloadEncoderScript);
     }
 
-    public Application copyProperties(String targetOrganizationID, String targetServiceProfileId, boolean withId){
+    public Application copyProperties(String targetOrganizationID, String targetServiceProfileId, String id){
         Application targetApplication = new Application();
         try {
             BeanUtils.copyProperties(targetApplication,this);
         } catch (IllegalAccessException | InvocationTargetException e) {
             log.error("CopyProperties sourceApplication to targetApplication error",e);
         }
-        if (!withId){
-            targetApplication.setId(null);
-        }
+        targetApplication.setId(id);
         targetApplication.setOrganizationID(targetOrganizationID);
         targetApplication.setServiceProfileID(targetServiceProfileId);
         return targetApplication;

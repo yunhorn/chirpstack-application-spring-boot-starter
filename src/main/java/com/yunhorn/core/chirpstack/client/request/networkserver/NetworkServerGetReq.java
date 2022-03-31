@@ -23,4 +23,8 @@ public class NetworkServerGetReq {
     private String limit;
     private String offset;
     private String organizationID;
+    public NetworkServerGetReq(){}
+    public NetworkServerGetReq(String organizationID){
+        this.organizationID = organizationID;
+    }
 }

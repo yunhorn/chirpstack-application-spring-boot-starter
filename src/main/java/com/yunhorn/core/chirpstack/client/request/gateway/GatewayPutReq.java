@@ -37,4 +37,10 @@ public class GatewayPutReq {
 //    }
 //    }
 
+    public GatewayPutReq(){
+
+    }
+    public GatewayPutReq(Gateway gateway){
+        this.gateway = gateway;
+    }
 }

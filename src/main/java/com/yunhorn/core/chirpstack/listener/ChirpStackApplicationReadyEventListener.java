@@ -78,5 +78,6 @@ public class ChirpStackApplicationReadyEventListener implements ApplicationListe
         log.info("chirpStack-syncer Check the configuration passed!");
         chirpStackSyncTask.syncApplication();
         chirpStackSyncTask.syncDevice();
+        chirpStackSyncTask.syncGateway();
     }
 }
