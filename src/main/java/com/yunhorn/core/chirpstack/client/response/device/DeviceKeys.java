@@ -31,14 +31,14 @@ public class DeviceKeys {
         DeviceKeys thisDeviceKeys = this;
         DeviceKeys thatDeviceKeys = (DeviceKeys) o;
         return Optional.ofNullable(thisDeviceKeys.getAppKey()).orElse("").equals(Optional.ofNullable(thatDeviceKeys.getAppKey()).orElse(""))
-                && Optional.ofNullable(thisDeviceKeys.getGenAppKey()).orElse("").equals(Optional.ofNullable(thatDeviceKeys.getGenAppKey()).orElse(""))
+//                && Optional.ofNullable(thisDeviceKeys.getGenAppKey()).orElse("").equals(Optional.ofNullable(thatDeviceKeys.getGenAppKey()).orElse(""))
                 && Optional.ofNullable(thisDeviceKeys.getDevEUI()).orElse("").equals(Optional.ofNullable(thatDeviceKeys.getDevEUI()).orElse(""))
                 && Optional.ofNullable(thisDeviceKeys.getNwkKey()).orElse("").equals(Optional.ofNullable(thatDeviceKeys.getNwkKey()).orElse(""));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(appKey, devEUI, genAppKey, nwkKey);
+        return Objects.hash(appKey, devEUI, nwkKey);
     }
 
     public DeviceKeys copyProperties(){

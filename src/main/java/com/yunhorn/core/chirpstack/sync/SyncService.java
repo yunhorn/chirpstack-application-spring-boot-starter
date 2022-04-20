@@ -19,7 +19,6 @@ import com.yunhorn.core.chirpstack.client.request.gatewayprofile.GatewayProfileG
 import com.yunhorn.core.chirpstack.client.request.gatewayprofile.GatewayProfilePostReq;
 import com.yunhorn.core.chirpstack.client.request.gatewayprofile.GatewayProfilePutReq;
 import com.yunhorn.core.chirpstack.client.request.networkserver.NetworkServerGetReq;
-import com.yunhorn.core.chirpstack.client.request.networkserver.NetworkServerPutReq;
 import com.yunhorn.core.chirpstack.client.request.organization.OrganizationGetReq;
 import com.yunhorn.core.chirpstack.client.request.serviceprofile.ServiceProfile;
 import com.yunhorn.core.chirpstack.client.request.serviceprofile.ServiceProfileGetReq;
@@ -39,7 +38,6 @@ import com.yunhorn.core.chirpstack.client.response.gatewayprofile.GatewayProfile
 import com.yunhorn.core.chirpstack.client.response.gatewayprofile.GatewayProfileGetResp;
 import com.yunhorn.core.chirpstack.client.response.gatewayprofile.GatewayProfileGetResult;
 import com.yunhorn.core.chirpstack.client.response.gatewayprofile.GatewayProfilePostResp;
-import com.yunhorn.core.chirpstack.client.response.networkserver.NetworkServerGetInfoResp;
 import com.yunhorn.core.chirpstack.client.response.networkserver.NetworkServerGetResp;
 import com.yunhorn.core.chirpstack.client.response.networkserver.NetworkServerGetResult;
 import com.yunhorn.core.chirpstack.client.response.organization.OrganizationGetResp;
@@ -54,6 +52,7 @@ import com.yunhorn.core.chirpstack.dto.GatewaySyncReq;
 import com.yunhorn.core.chirpstack.dto.SyncReq;
 import com.yunhorn.core.chirpstack.util.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -253,7 +252,12 @@ public class SyncService {
                             log.info("Update target chirpStack Application's Device|Before update:{}|After update:{}", JSONUtils.beanToJson(targetDevice),JSONUtils.beanToJson(newTargetDevice));
                             updateDevice = true;
                         }
-                        DeviceKeysGetResp sourceDeviceKeysGetResp = deviceServiceLoraWanHttp.getDeviceKey(sourceDevice.getDevEUI(),sourceDomain,sourceAccount,sourcePassword);
+                        DeviceKeysGetResp sourceDeviceKeysGetResp = null;
+                        try {
+                            sourceDeviceKeysGetResp = deviceServiceLoraWanHttp.getDeviceKey(sourceDevice.getDevEUI(),sourceDomain,sourceAccount,sourcePassword);
+                        }catch (Exception e){
+                            log.error("SyncDevice.deviceServiceLoraWanHttp.getDeviceKey error",e);
+                        }
                         DeviceKeysGetResp targetDeviceKeysGetResp = deviceServiceLoraWanHttp.getDeviceKey(targetDevice.getDevEUI(),targetDomain,targetAccount,targetPassword);
                         if (sourceDeviceKeysGetResp==null && targetDeviceKeysGetResp!=null){
                             //如果源Device不存在Key但是目标Device存在Key，则把目标Device的Key删除
@@ -382,12 +386,15 @@ public class SyncService {
                 }
                 String sourceServiceProfileName = sourceServiceProfileIdMap.get(sourceGateway.getServiceProfileID());
                 String targetServiceProfileId = targetServiceProfileNameMap.get(sourceServiceProfileName);
+                if (StringUtils.isNotBlank(gatewaySyncReq.getTargetServiceProfileName())){
+                    targetServiceProfileId = targetServiceProfileNameMap.get(gatewaySyncReq.getTargetServiceProfileName());
+                }
                 String sourceGatewayProfileName = sourceGatewayProfileIdMap.get(sourceGateway.getGatewayProfileID());
                 String targetGatewayProfileId = targetGatewayProfileNameMap.get(sourceGatewayProfileName);
                 if (targetGatewayId!=null){
                     GatewayGetInfoResp targetGatewayGetInfoResp = gatewayServiceLoraWanHttp.get(targetGatewayId,targetDomain,targetAccount,targetPassword);
                     Gateway targetGateway = targetGatewayGetInfoResp.getGateway();
-                    if (!sourceGateway.equals(targetGateway)){
+                    if (!sourceGateway.equals(targetGateway) || (targetServiceProfileId!=null && !targetServiceProfileId.equals(targetGateway.getServiceProfileID()))){
                         Gateway targetGatewayCopy = sourceGateway.copyProperties(targetGateway.getOrganizationID(),targetNetworkServerId,targetServiceProfileId,targetGatewayProfileId);
                         gatewayServiceLoraWanHttp.put(new GatewayPutReq(targetGatewayCopy),targetDomain,targetAccount,targetPassword);
                         log.info("Update target chirpStack Gateway|Before update:{}|After update:{}", JSONUtils.beanToJson(targetGateway),JSONUtils.beanToJson(targetGatewayCopy));

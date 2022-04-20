@@ -8,5 +8,5 @@ import lombok.Data;
  */
 @Data
 public class GatewaySyncReq extends SyncReq{
-
+    private String targetServiceProfileName;
 }
