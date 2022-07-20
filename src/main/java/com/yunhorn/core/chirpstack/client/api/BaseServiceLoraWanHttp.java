@@ -80,17 +80,22 @@ public class BaseServiceLoraWanHttp {
         return (T) JSONUtils.jsonToBean(result,responseType);
     }
 
-    private String request(String domain, String path, Map<String,String> headerMap, Object reqBody, HttpMethod httpMethod){
-        if (HttpMethod.GET.equals(httpMethod)){
-            return RestTemplateUtil.getInstance().get(domain+path,reqBody,headerMap,String.class);
-        }else if (HttpMethod.POST.equals(httpMethod)){
-            return RestTemplateUtil.getInstance().post(domain+path,reqBody,headerMap,String.class);
-        }else if (HttpMethod.PUT.equals(httpMethod)){
-            return RestTemplateUtil.getInstance().put(domain+path,reqBody,headerMap,String.class);
-        }else if (HttpMethod.DELETE.equals(httpMethod)){
-            return RestTemplateUtil.getInstance().delete(domain+path,reqBody,headerMap,String.class);
+    public String request(String domain, String path, Map<String,String> headerMap, Object reqBody, HttpMethod httpMethod){
+        try {
+            if (HttpMethod.GET.equals(httpMethod)){
+                return RestTemplateUtil.getInstance().get(domain+path,reqBody,headerMap,String.class);
+            }else if (HttpMethod.POST.equals(httpMethod)){
+                return RestTemplateUtil.getInstance().post(domain+path,reqBody,headerMap,String.class);
+            }else if (HttpMethod.PUT.equals(httpMethod)){
+                return RestTemplateUtil.getInstance().put(domain+path,reqBody,headerMap,String.class);
+            }else if (HttpMethod.DELETE.equals(httpMethod)){
+                return RestTemplateUtil.getInstance().delete(domain+path,reqBody,headerMap,String.class);
+            }
+            return null;
+        }catch (Exception e){
+            e.printStackTrace();
+            return e.getMessage();
         }
-        return null;
     }
 
     private boolean checkIsAuthenticationFailed(String result){
