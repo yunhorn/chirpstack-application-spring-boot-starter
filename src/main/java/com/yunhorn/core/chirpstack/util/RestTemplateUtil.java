@@ -4,9 +4,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -32,6 +35,16 @@ public class RestTemplateUtil {
             headers.forEach(httpHeaders::add);
         }
         HttpEntity<?> entity = new HttpEntity<>(body, httpHeaders);
+        restTemplate.setErrorHandler(new ResponseErrorHandler() {
+            @Override
+            public boolean hasError(ClientHttpResponse response) {
+                return false;
+            }
+
+            @Override
+            public void handleError(ClientHttpResponse response){
+            }
+        });
         ResponseEntity<T> responseEntity = restTemplate.exchange(url, httpMethod,entity,responseType);
         return responseEntity.getBody();
     }
