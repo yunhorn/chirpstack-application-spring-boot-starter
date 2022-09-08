@@ -9,6 +9,8 @@ import com.yunhorn.core.chirpstack.util.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 /**
  * @author ljm
  * @date 2021/2/25 11:38
@@ -69,5 +71,9 @@ public class GatewayServiceLoraWanHttp extends BaseServiceLoraWanHttp {
      */
     public GatewayGetInfoResp get(String id, String domain, String account, String password){
         return sendHttpsGet(domain,API_PATH+"/"+id,account,password,null,null,GatewayGetInfoResp.class);
+    }
+
+    public GatewayGetInfoResp get(String id, String domain, String account, String password, Map<String,String> headerMap){
+        return sendHttpsGet(domain,API_PATH+"/"+id,account,password,headerMap,null,GatewayGetInfoResp.class);
     }
 }

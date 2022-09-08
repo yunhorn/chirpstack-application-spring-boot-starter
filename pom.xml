@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.yunhorn.core</groupId>
 	<artifactId>chirpstack-app-syncer</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<name>chirpstack-application-spring-boot-starter</name>
 	<description>Sync your application on two chirpstack-appserver</description>
 	<properties>
