@@ -3,6 +3,7 @@ package com.yunhorn.core.chirpstack;
 import com.google.common.collect.Maps;
 import com.yunhorn.core.chirpstack.util.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.ClassRule;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.http.HttpEntity;
@@ -10,7 +11,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import org.testcontainers.containers.DockerComposeContainer;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -19,11 +22,20 @@ import java.util.Map;
  */
 @Slf4j
 public class LoginTest {
+
+    @ClassRule
+    public static DockerComposeContainer environment =
+            new DockerComposeContainer(new File("src/test/resources/docker-compose-v4.yml"))
+                    .withExposedService("postgres", 5432)
+                    .withExposedService("redis", 6379);
+
     @Test
     public void loginTest(){
+        environment.start();
         String domain = System.getProperty("chirpstack.test.domain","");
         String account = System.getProperty("chirpstack.test.account","");
         String password = System.getProperty("chirpstack.test.password","");
+        log.info("redis.start:{}",environment.getContainerByServiceName("redis").isPresent());
         if (StringUtils.isBlank(domain) || StringUtils.isBlank(account) || StringUtils.isBlank(password)){
             return;
         }

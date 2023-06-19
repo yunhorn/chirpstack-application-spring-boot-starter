@@ -20,7 +20,16 @@
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<junit.version>4.13.1</junit.version>
 	</properties>
+
 	<dependencies>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<version>1.18.3</version>
+			<scope>test</scope>
+		</dependency>
+
 
 		<dependency>
 			<groupId>junit</groupId>
