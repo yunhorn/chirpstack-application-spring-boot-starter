@@ -25,7 +25,7 @@ public class LoginTest {
 
     @ClassRule
     public static DockerComposeContainer environment =
-            new DockerComposeContainer(new File("src/test/resources/docker-compose-v4.yml"))
+            new DockerComposeContainer(new File("src/test/resources/docker-compose-v3.yml"))
                     .withExposedService("postgres", 5432)
                     .withExposedService("redis", 6379);
 
