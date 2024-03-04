@@ -28,7 +28,7 @@ jobs:
     - uses: https://gitea.com/actions/checkout@v3
     - name: Set up JDK
       id: setup-java
-      uses: https://gitea.com/actions/setup-java@v3
+      uses: https://gitea.com/actions/setup-java@v4
       with:
         java-version: ${{ matrix.java }}
         distribution: 'temurin'
